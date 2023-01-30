@@ -14,7 +14,7 @@ parser_cluster.add_argument("-c", "--cores", type=int, required=True, help='numb
 parser_cluster.add_argument("-m", "--memory-per-core", type=int, required=True, help='memory in MB per core required')
 parser_cluster.add_argument("-t", "--time", type=float, required=True, help='allocation time in hours')
 
-parser_containers = subparsers.add_parser('list-containers', help='list all available containers')
+parser_containers = subparsers.add_parser('listcontainers', help='list all available containers')
 
 parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
 parser_gaussian.add_argument('-j','--jobs', nargs='+', required=True, help='gaussian input file')
