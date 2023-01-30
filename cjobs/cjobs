@@ -3,8 +3,14 @@
 import configparser
 import subprocess
 import argparse
+import sys
+import os
+import pathlib
 
-from tools.util import get_containers_using_rclone, parse_containers_list
+CJOBS_DIR = sys.path[0]
+sys.path.append(CJOBS_DIR)
+from tools.container_tools import request_containers_using_rclone, parse_containers_list
+from tools.scheduler_tools import build_scheduler_header
 
 parser = argparse.ArgumentParser()
 
@@ -20,23 +26,24 @@ parser_cluster.add_argument("-t", "--time", type=float, required=True, help='all
 parser_containers = subparsers.add_parser('listcontainers', help='list all available containers')
 
 parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
-parser_gaussian.add_argument('-j','--jobs', nargs='+', required=True, help='gaussian input file')
+parser_gaussian.add_argument('-j','--job', nargs='+', required=True, help='gaussian input file')
 
 parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
-parser_xtb.add_argument('-j','--jobs', nargs='+', required=True, help='coordinates file')
+parser_xtb.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
 parser_xtb.add_argument('-f','--flags', help='xTB flags')
 parser_xtb.add_argument('-i','--input', help='xTB detailed input file')
 
 parser_crest = subparsers.add_parser('crest', help="setup crest calculation", parents=[parser_cluster])
-parser_crest.add_argument('-j','--jobs', nargs='+', required=True, help='coordinates file')
+parser_crest.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
 parser_crest.add_argument('-f','--flags', help='crest flags')
 parser_crest.add_argument('-i','--input', help='crest detailed input file')
 
 args = parser.parse_args()
 print(args)
 
+
 if args.subparser == 'listcontainers':
-    stdout, stderr = get_containers_using_rclone("sintcatmol:containers")
+    stdout, stderr = request_containers_using_rclone("sintcatmol:containers")
 
     if stderr:
         print(stderr)
@@ -50,3 +57,77 @@ if args.subparser == 'listcontainers':
             container_data = container_data.split('_')
             print("{: <15}{: <25}{: <}".format(container_data[-1], container_data[-2], container))
     exit
+
+# read config file
+SCRATCH_DIR = '/scratch/"$USER"'
+
+
+# Set variables according to n_jobs and scheduler type
+# job_tag => single-job name or array name (unique)
+# job
+#
+n_jobs = len(args.job)
+if n_jobs == 1:
+    job_name_in_script = 'job_name'
+    job_input_in_script = 'job_input'
+    job_local_dir_in_script = 'job_local_dir'
+    job_scratch_dir_in_script = 'job_scratch_dir'
+
+    job_input = args.job[0]
+    job_tag = pathlib.Path(args.job[0]).stem
+    job_name = job_tag
+    
+    job_local_dir =f'{os.getcwd()}'
+    job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+else:
+    # function that writes a input file
+    job_input_in_script = f'job_input'
+    job_name_in_script = 'job_name'
+    job_local_dir_in_script = 'job_local_dir'
+    job_scratch_dir_in_script = 'job_scratch_dir'  
+
+    job_tag = "array_a85sy5"
+    job_input = r"$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' $config)"
+    job_name = '$(cut -f 1 -d \'.\' "$job_input")'
+    
+    job_local_dir = f'{os.getcwd()}'
+    job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+
+# Write scheduler header to the job file
+jobfile = open('job.txt', mode='w')
+jobfile.write('#!/bin/bash\n')
+scheduler_header = build_scheduler_header(scheduler='slurm', job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=args.time)
+jobfile.write('\n'.join(scheduler_header)+'\n\n')
+
+# Write clean_job trap function to job file
+jobfile.write("{:#^80}".format('  CLEAN JOB  ')+'\n') 
+with open(f"{CJOBS_DIR}/tools/clean_job.sh") as f:
+    jobfile.write(f.read()+'\n\n')
+
+# Write job directories to the job file
+jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')
+jobfile.write(f'export job_input={job_input}\n')
+jobfile.write(f'export job_name={job_name}\n')
+jobfile.write(f'export {job_local_dir_in_script}="{job_local_dir}"\n')
+jobfile.write(f'export {job_scratch_dir_in_script}={job_scratch_dir}\n')
+jobfile.write(f'mkdir "${job_scratch_dir_in_script}"\n')
+jobfile.write('\n')
+jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
+jobfile.write(f'cd "${job_scratch_dir_in_script}"\n')
+jobfile.write('\n')
+
+# Write software settings to the job file
+jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
+if args.subparser == 'gaussian':
+    stdout, stderr = request_containers_using_rclone("sintcatmol:containers")
+    containers_list = [i for i in stdout.split('\n')]
+    containers_data = parse_containers_list(containers_list)
+
+elif args.subparser == 'xtb':
+    pass
+
+elif args.subparser == 'crest':
+    pass
+
+jobfile.close()
+exit()
