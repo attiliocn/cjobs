@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+
+import configparser
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--send-files", nargs='+', required=False, help='send files from local to remote directory')
+parser.add_argument("-c", "--cores", type=int, required=True, help='number of cores (CPUs) to be allocated')
+parser.add_argument("-m", "--memory-per-core", type=int, required=True, help='memory in MB per core required')
+parser.add_argument("-t", "--time", type=float, required=True, help='allocation time in hours')
+
+subparsers = parser.add_subparsers(required=True)
+
+parser_gaussian = subparsers.add_parser('gaussian', help='Use Gaussian')
+parser_gaussian.add_argument('-j','--jobs', nargs='+', required=True, help='gaussian input file')
+
+parser_xtb = subparsers.add_parser('xtb', help="Use xTB")
+parser_xtb.add_argument('-j','--jobs', nargs='+', required=True, help='coordinates file')
+parser_xtb.add_argument('-f','--flags', help='xTB flags')
+parser_xtb.add_argument('-i','--input', help='xTB detailed input file')
+
+parser_crest = subparsers.add_parser('crest', help="Use crest")
+parser_crest.add_argument('-j','--jobs', nargs='+', required=True, help='coordinates file')
+parser_crest.add_argument('-f','--flags', help='crest flags')
+parser_crest.add_argument('-i','--input', help='crest detailed input file')
+
+args = parser.parse_args()
+print(args)
