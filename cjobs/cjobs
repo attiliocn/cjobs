@@ -4,6 +4,8 @@ import configparser
 import subprocess
 import argparse
 
+from tools.util import get_containers_using_rclone, parse_containers_list
+
 parser = argparse.ArgumentParser()
 
 subparsers = parser.add_subparsers(required=True, dest='subparser')
@@ -32,13 +34,6 @@ parser_crest.add_argument('-i','--input', help='crest detailed input file')
 
 args = parser.parse_args()
 print(args)
-
-def get_containers_using_rclone(remote_path):
-    cli_string = f"rclone lsf {remote_path}"
-    process = subprocess.run(cli_string, capture_output=True, shell=True)
-    stdout = process.stdout.strip().decode("utf-8")
-    stderr = process.stderr.strip().decode("utf-8")
-    return stdout, stderr
 
 if args.subparser == 'listcontainers':
     stdout, stderr = get_containers_using_rclone("sintcatmol:containers")
