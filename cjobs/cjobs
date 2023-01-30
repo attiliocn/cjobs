@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import configparser
+import subprocess
 import argparse
 
 parser = argparse.ArgumentParser()
 
-subparsers = parser.add_subparsers(required=True)
+subparsers = parser.add_subparsers(required=True, dest='subparser')
 
 parser_cluster = subparsers.add_parser('cluster-setup', add_help=False)
 parser_cluster.add_argument("container", help='.sif container ID. To list available containers use cjobs --list-containers')
@@ -31,3 +32,26 @@ parser_crest.add_argument('-i','--input', help='crest detailed input file')
 
 args = parser.parse_args()
 print(args)
+
+def get_containers_using_rclone(remote_path):
+    cli_string = f"rclone lsf {remote_path}"
+    process = subprocess.run(cli_string, capture_output=True, shell=True)
+    stdout = process.stdout.strip().decode("utf-8")
+    stderr = process.stderr.strip().decode("utf-8")
+    return stdout, stderr
+
+if args.subparser == 'listcontainers':
+    stdout, stderr = get_containers_using_rclone("sintcatmol:containers")
+
+    if stderr:
+        print(stderr)
+        print("Could not fetch containers list from Google Drive.\nCheck your configuration file and try again")
+    else:
+        containers = [i for i in stdout.split('\n')]
+        containers.sort()
+        print("{: <15}{: <25}{: <}".format('Container ID', "Build Time", "File"))
+        for container in containers:
+            container_data = container.replace('.sif','')
+            container_data = container_data.split('_')
+            print("{: <15}{: <25}{: <}".format(container_data[-1], container_data[-2], container))
+    exit
