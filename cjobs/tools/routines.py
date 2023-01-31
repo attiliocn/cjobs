@@ -1,6 +1,6 @@
 def build_gaussian16_routine(scrdir, n_cores, job_input, container):
     g16_routine = []
-    g16_routine.append(f'export $GAUSS_SCRDIR="${scrdir}"/src')
+    g16_routine.append(f'export $GAUSS_SCRDIR=""${scrdir}"/src"')
     g16_routine.append(f'mkdir $GAUSS_SCRDIR')
     g16_routine.append(f'')
     g16_routine.append(f'export MKL_NUM_THREADS={n_cores}')
