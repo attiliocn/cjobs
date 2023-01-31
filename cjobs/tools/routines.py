@@ -12,13 +12,19 @@ def build_gaussian16_routine(g16_scrdir, n_cores, job_input, container):
     g16_routine.append(f'singularity run {container} g16 < "${job_input}" > "$job_output"')
     return g16_routine
 
-def build_xtb_routine(n_cores, job_input, flags, container):
+def build_xtb_routine(scrdir, n_cores, job_input, flags, container):
     xtb_routine = []
-    xtb_routine.append(f'')
     xtb_routine.append(f'export MKL_NUM_THREADS={n_cores}')
     xtb_routine.append(f'export OMP_NUM_THREADS={n_cores}')
     xtb_routine.append(f'export OMP_STACKSIZE=4G')
     xtb_routine.append(f'ulimit -s unlimited')
     xtb_routine.append(f'')
-    xtb_routine.append(f'singularity run {container} xtb "${job_input}" {" ".join(flags)} &> xtb.output')
+    xtb_routine.append(
+        f'''singularity run \\
+    --bind="${scrdir}":"${scrdir}" \\
+    {container} \\
+    "${scrdir}" \\
+    xtb "${job_input}" {" ".join(flags)} &> xtb.output
+'''
+)
     return xtb_routine
