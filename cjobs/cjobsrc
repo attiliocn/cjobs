@@ -1,0 +1,5 @@
+[CONTAINERS]
+    cloud dir = 
+[SCHEDULER]
+    engine = 
+    scratch dir = 

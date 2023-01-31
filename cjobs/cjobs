@@ -59,9 +59,19 @@ if args.subparser == 'listcontainers':
     exit()
 
 # read config file
-QUEUE_SYSTEM = ''
-SCRATCH_DIR = '/scratch/"$USER"'
-CONTAINERS_CLOUD_DIR = 'sintcatmol:containers'
+config = configparser.ConfigParser()
+config_file = os.path.join(os.environ['HOME'], '.cjobsrc')
+try:
+    with open(config_file) as f:
+        config.read_file(f)
+except FileNotFoundError:
+    print('Error: Configuration file not found.')
+    print('Missing ~/.cjobsrc file')
+    exit()
+
+QUEUE_SYSTEM = config['SCHEDULER']['engine']
+SCRATCH_DIR = config['SCHEDULER']['scratch dir']
+CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
 
 # check if container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
