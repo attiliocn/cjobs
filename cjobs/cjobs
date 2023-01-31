@@ -124,7 +124,7 @@ else:
 # Write scheduler header to the job file
 jobfile = open(f'job_{job_tag}.sh', mode='w')
 jobfile.write('#!/bin/bash\n')
-scheduler_header = build_scheduler_header(scheduler='slurm', job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=walltime)
+scheduler_header = build_scheduler_header(scheduler=QUEUE_SYSTEM, job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=walltime)
 jobfile.write('\n'.join(scheduler_header)+'\n\n')
 
 # Write clean_job trap function to job file
