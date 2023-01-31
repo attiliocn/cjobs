@@ -1,7 +1,7 @@
 import subprocess
 
 def request_containers_using_rclone(remote_path):
-    cli_string = f"rclone lsf {remote_path}"
+    cli_string = f"rclone lsf {remote_path} | grep .sif"
     process = subprocess.run(cli_string, capture_output=True, shell=True)
     stdout = process.stdout.strip().decode("utf-8")
     stderr = process.stderr.strip().decode("utf-8")
