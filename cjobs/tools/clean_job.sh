@@ -13,3 +13,4 @@ function clean_job() {
   fi
   exit
 }
+trap clean_job EXIT HUP INT TERM ERR
