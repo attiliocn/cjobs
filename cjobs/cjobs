@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(required=True, dest='subparser')
 
 parser_cluster = subparsers.add_parser('cluster-setup', add_help=False)
-parser_cluster.add_argument("container", help='.sif container ID. To list available containers use cjobs --list-containers')
+parser_cluster.add_argument("--container", required=True, help='.sif container ID. To list available containers use cjobs --list-containers')
 parser_cluster.add_argument("--send-files", nargs='+', required=False, help='send files from local to remote directory')
 parser_cluster.add_argument("-c", "--cores", type=int, required=True, help='number of cores (CPUs) to be allocated')
 parser_cluster.add_argument("-m", "--memory-per-core", type=int, required=True, help='memory in MB per core required')
