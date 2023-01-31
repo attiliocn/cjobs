@@ -13,8 +13,7 @@ def build_gaussian16_routine(scrdir, n_cores, job_input, container):
     --bind="${scrdir}":"${scrdir}" \\
     {container} \\
     "${scrdir}" \\
-    g16 "${job_input}" &
-'''
+    g16 "${job_input}" &'''
 )
     g16_routine.append('wait')
     g16_routine.append('exit')
@@ -32,7 +31,6 @@ def build_xtb_routine(scrdir, n_cores, job_input, flags, container):
     --bind="${scrdir}":"${scrdir}" \\
     {container} \\
     "${scrdir}" \\
-    xtb "${job_input}" {" ".join(flags)} &> xtb.output
-'''
+    xtb "${job_input}" {" ".join(flags)} &> xtb.output'''
 )
     return xtb_routine
