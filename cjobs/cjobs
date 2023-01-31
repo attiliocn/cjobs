@@ -12,7 +12,7 @@ CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
 from tools.container_tools import request_containers_using_rclone, parse_containers_list
 from tools.scheduler_tools import build_scheduler_header
-from tools.routines import build_gaussian16_routine
+from tools.routines import build_gaussian16_routine, build_xtb_routine
 
 parser = argparse.ArgumentParser()
 
@@ -32,12 +32,12 @@ parser_gaussian.add_argument('-j','--job', nargs='+', required=True, help='gauss
 
 parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
 parser_xtb.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
-parser_xtb.add_argument('-f','--flags', help='xTB flags')
+parser_xtb.add_argument('-f','--flags', nargs='+', default='', help='xTB flags')
 parser_xtb.add_argument('-i','--input', help='xTB detailed input file')
 
 parser_crest = subparsers.add_parser('crest', help="setup crest calculation", parents=[parser_cluster])
 parser_crest.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
-parser_crest.add_argument('-f','--flags', help='crest flags')
+parser_crest.add_argument('-f','--flags', nargs='+', default='', help='crest flags')
 parser_crest.add_argument('-i','--input', help='crest detailed input file')
 
 args = parser.parse_args()
@@ -152,12 +152,15 @@ jobfile.write('\n')
 
 # Write software settings to the job file
 jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
+
 if args.subparser == 'gaussian':
     job_routine = build_gaussian16_routine(g16_scrdir=f'"${job_scratch_dir_in_script}"/src', n_cores=args.cores, job_input=job_input_in_script, container=containers_data[args.container]['file'])
     jobfile.write('\n'.join(job_routine)+'\n')
 
 elif args.subparser == 'xtb':
-    pass
+    job_routine = build_xtb_routine(n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=containers_data[args.container]['file'])
+    jobfile.write('\n'.join(job_routine)+'\n')
+
 elif args.subparser == 'crest':
     pass
 jobfile.close()
