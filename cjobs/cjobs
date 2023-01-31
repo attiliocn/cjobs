@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import sys
 import os
+import datetime
 import pathlib
 
 CJOBS_DIR = sys.path[0]
@@ -73,6 +74,14 @@ if args.container not in containers_data.keys():
     print('Use cjobs --listcontainers for a list of valid containers')
     exit()
 
+# convert jobtime from hours to input format HH:MM:SS
+duration = datetime.timedelta(hours=args.time)
+totsec = duration.total_seconds()
+h = totsec//3600
+m = (totsec%3600) // 60
+sec =(totsec%3600)%60 #just for reference
+walltime = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
+
 # Set variables according to n_jobs and scheduler type
 # job_tag => single-job name or array name (unique)
 # job
@@ -105,9 +114,9 @@ else:
     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
 
 # Write scheduler header to the job file
-jobfile = open('job.txt', mode='w')
+jobfile = open('job.sh', mode='w')
 jobfile.write('#!/bin/bash\n')
-scheduler_header = build_scheduler_header(scheduler='slurm', job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=args.time)
+scheduler_header = build_scheduler_header(scheduler='slurm', job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=walltime)
 jobfile.write('\n'.join(scheduler_header)+'\n\n')
 
 # Write clean_job trap function to job file
