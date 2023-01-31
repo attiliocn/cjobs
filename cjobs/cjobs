@@ -41,8 +41,6 @@ parser_crest.add_argument('-f','--flags', help='crest flags')
 parser_crest.add_argument('-i','--input', help='crest detailed input file')
 
 args = parser.parse_args()
-print(args)
-
 
 if args.subparser == 'listcontainers':
     stdout, stderr = request_containers_using_rclone("sintcatmol:containers")
