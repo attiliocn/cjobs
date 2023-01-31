@@ -20,5 +20,5 @@ def build_xtb_routine(n_cores, job_input, flags, container):
     xtb_routine.append(f'export OMP_STACKSIZE=4G')
     xtb_routine.append(f'ulimit -s unlimited')
     xtb_routine.append(f'')
-    xtb_routine.append(f'singularity run {container} xtb "${job_input}" {" ".join(flags)}  &> xtb.output')
+    xtb_routine.append(f'singularity run {container} xtb "${job_input}" {" ".join(flags)} &> xtb.output')
     return xtb_routine
