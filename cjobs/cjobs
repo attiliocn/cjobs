@@ -122,7 +122,7 @@ else:
     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
 
 # Write scheduler header to the job file
-jobfile = open('job.sh', mode='w')
+jobfile = open(f'job_{job_tag}.sh', mode='w')
 jobfile.write('#!/bin/bash\n')
 scheduler_header = build_scheduler_header(scheduler='slurm', job_name=job_tag, n_jobs=n_jobs, n_cores=args.cores, memory=args.memory_per_core, job_time=walltime)
 jobfile.write('\n'.join(scheduler_header)+'\n\n')
@@ -160,6 +160,5 @@ elif args.subparser == 'xtb':
     pass
 elif args.subparser == 'crest':
     pass
-
 jobfile.close()
 exit()
