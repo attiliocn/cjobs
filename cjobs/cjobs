@@ -115,6 +115,12 @@ jobfile.write("{:#^80}".format('  CLEAN JOB  ')+'\n')
 with open(f"{CJOBS_DIR}/tools/clean_job.sh") as f:
     jobfile.write(f.read()+'\n\n')
 
+# Write container settings to the job file
+jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
+with open(f"{CJOBS_DIR}/tools/get_containers.sh") as f:
+    jobfile.write(f.read()+'\n')
+jobfile.write(f'get_containers {SCRATCH_DIR}/containers {CONTAINERS_CLOUD_DIR}/{containers_data[args.container]["file"]}\n\n')
+
 # Write job directories to the job file
 jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')
 jobfile.write(f'export job_input={job_input}\n')
@@ -126,12 +132,6 @@ jobfile.write('\n')
 jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
 jobfile.write(f'cd "${job_scratch_dir_in_script}"\n')
 jobfile.write('\n')
-
-# Write container settings to the job file
-jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
-with open(f"{CJOBS_DIR}/tools/get_containers.sh") as f:
-    jobfile.write(f.read()+'\n')
-jobfile.write(f'get_containers {SCRATCH_DIR}/containers {CONTAINERS_CLOUD_DIR}/{containers_data[args.container]["file"]}\n\n')
 
 # Write software settings to the job file
 jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
