@@ -159,7 +159,7 @@ jobfile.write('\n')
 jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
 
 if args.subparser == 'gaussian':
-    job_routine = build_gaussian16_routine(g16_scrdir=f'"${job_scratch_dir_in_script}"/src', n_cores=args.cores, job_input=job_input_in_script, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
+    job_routine = build_gaussian16_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
     jobfile.write('\n'.join(job_routine)+'\n')
 
 elif args.subparser == 'xtb':
