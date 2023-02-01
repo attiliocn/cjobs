@@ -19,3 +19,14 @@ def build_scheduler_header(scheduler, job_name, n_cores, memory, job_time, n_job
     else:
         return None
     return scheduler_header
+
+def get_scheduler_variables(scheduler):
+    scheduler_vars = {}
+    if scheduler == 'slurm':
+        scheduler_vars['job_id'] = '$SLURM_JOB_ID'
+    elif scheduler == 'pbs-pro':
+        scheduler_vars['job_id'] = '$PBS_JOBID'
+    else:
+        return None
+    return scheduler_vars
+    
