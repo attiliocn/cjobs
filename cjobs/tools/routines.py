@@ -16,6 +16,7 @@ def build_gaussian16_routine(scrdir, n_cores, job_input, container):
     g16 "${job_input}" &'''
 )
     g16_routine.append('wait')
+    g16_routine.append(f'rm -r "$GAUSS_SCRDIR"')
     g16_routine.append('exit')
     return g16_routine
 
