@@ -72,6 +72,7 @@ except FileNotFoundError:
 QUEUE_SYSTEM = config['SCHEDULER']['engine']
 SCRATCH_DIR = config['SCHEDULER']['scratch dir']
 CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
+CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
 
 # check if container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
@@ -136,7 +137,7 @@ with open(f"{CJOBS_DIR}/tools/clean_job.sh") as f:
 jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
 with open(f"{CJOBS_DIR}/tools/get_containers.sh") as f:
     jobfile.write(f.read()+'\n')
-jobfile.write(f'get_containers {SCRATCH_DIR}/containers {CONTAINERS_CLOUD_DIR}/{containers_data[args.container]["file"]}\n\n')
+jobfile.write(f'get_containers {CONTAINERS_CLOUD_DIR} {CONTAINERS_LOCAL_DIR} \n\n')
 
 # Write job directories to the job file
 jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')
