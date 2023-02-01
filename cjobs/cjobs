@@ -12,7 +12,7 @@ CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
 from tools.container_tools import request_containers_using_rclone, parse_containers_list
 from tools.scheduler_tools import get_scheduler_variables
-from tools import write_job
+from tools.write_job import write_job
 
 parser = argparse.ArgumentParser()
 
@@ -124,11 +124,11 @@ scheduler_variables = get_scheduler_variables(SCHEDULER)
 if args.array and len(args.job) > 1:
     pass
 else:
-    for job in args.job:      
+    for job in args.job:     
         job_input = job
         job_input_in_script = 'job_input'
 
-        job_tag = pathlib.Path(args.job[0]).stem
+        job_tag = pathlib.Path(job_input).stem
         job_name = job_tag
         job_name_in_script = 'job_name'
         
@@ -148,7 +148,6 @@ else:
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
             job_name=job_name,
-            job_name_in_script=job_name_in_script,
             job_local_dir=job_local_dir,
             job_local_dir_in_script=job_local_dir_in_script,
             job_scratch_dir=job_scratch_dir,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import pathlib
 
 from tools.scheduler_tools import build_scheduler_header
 from tools.routines import build_gaussian16_routine, build_xtb_routine, build_crest_routine
@@ -14,13 +15,12 @@ def write_job(
     job_input_in_script,
     job_tag,
     job_name,
-    job_name_in_script,
     job_local_dir,
     job_local_dir_in_script,
     job_scratch_dir,
     job_scratch_dir_in_script
 ):
-    CJOBS_DIR = sys.argv[0]
+    CJOBS_DIR = pathlib.Path(sys.argv[0]).parent
 
     # Write scheduler header to the job file
     jobfile = open(f'job_{job_tag}.sh', mode='w')
