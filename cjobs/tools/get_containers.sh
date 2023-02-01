@@ -1,12 +1,13 @@
 function get_containers() {
-  containers_dir="$1"
-  requested_container="$2"
-  if [[ ! -d $containers_dir ]]; then
-    mkdir $containers_dir
-    rclone copy "$requested_container" "$containers_dir"
-  else
-    if [[ ! -e "$containers_dir"/"$requested_container" ]]; then
-      rclone copy "$requested_container" "$containers_dir"
-    fi
+  container_cloud_dir="$1"
+  container_local_dir="$2"
+  if [[ ! -x  "$(command -v rclonador)" ]]; then
+    echo "rclone not found"
+    echo "make sure to copy containers to container_dir manually"
+    return
+  elif [[ ! -d $container_local_dir ]]; then
+    mkdir $container_local_dir
   fi    
+  rclone sync -v "$container_cloud_dir" "$container_local_dir"
+  return
 }
