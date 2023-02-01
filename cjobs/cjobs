@@ -11,8 +11,6 @@ import pathlib
 CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
 from tools.container_tools import request_containers_using_rclone, parse_containers_list
-from tools.scheduler_tools import build_scheduler_header
-from tools.routines import build_gaussian16_routine, build_xtb_routine, build_crest_routine
 
 parser = argparse.ArgumentParser()
 
