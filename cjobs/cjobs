@@ -130,12 +130,12 @@ jobfile.write('\n'.join(scheduler_header)+'\n\n')
 
 # Write clean_job trap function to job file
 jobfile.write("{:#^80}".format('  CLEAN JOB  ')+'\n') 
-with open(f"{CJOBS_DIR}/tools/clean_job.sh") as f:
+with open(f"{CJOBS_DIR}/extras/clean_job.sh") as f:
     jobfile.write(f.read()+'\n\n')
 
 # Write container settings to the job file
 jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
-with open(f"{CJOBS_DIR}/tools/get_containers.sh") as f:
+with open(f"{CJOBS_DIR}/extras/get_containers.sh") as f:
     jobfile.write(f.read()+'\n')
 jobfile.write(f'get_containers {CONTAINERS_CLOUD_DIR} {CONTAINERS_LOCAL_DIR} \n\n')
 
