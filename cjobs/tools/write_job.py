@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+from tools.scheduler_tools import build_scheduler_header
+from tools.routines import build_gaussian16_routine, build_xtb_routine, build_crest_routine
+
 def write_job():
     # Write scheduler header to the job file
     jobfile = open(f'job_{job_tag}.sh', mode='w')
