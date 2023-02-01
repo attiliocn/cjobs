@@ -45,7 +45,7 @@ def write_job(
     jobfile.write(f'export job_name={job_name}\n')
     jobfile.write(f'export {job_local_dir_in_script}="{job_local_dir}"\n')
     jobfile.write(f'export {job_scratch_dir_in_script}={job_scratch_dir}\n')
-    jobfile.write(f'mkdir "${job_scratch_dir_in_script}"\n')
+    jobfile.write(f'mkdir -p "${job_scratch_dir_in_script}"\n')
     jobfile.write('\n')
     jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
     if args.send_files:
