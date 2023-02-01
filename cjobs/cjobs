@@ -136,7 +136,7 @@ else:
         job_local_dir =f'{os.getcwd()}'
         job_local_dir_in_script = 'job_local_dir'
 
-        job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"${job_name_in_script}\"\""
+        job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\""
         job_scratch_dir_in_script = 'job_scratch_dir'
 
         write_job(
