@@ -1,7 +1,7 @@
 function get_containers() {
   container_cloud_dir="$1"
   container_local_dir="$2"
-  if [[ ! -x  "$(command -v rclonador)" ]]; then
+  if [[ ! -x  "$(command -v rclone)" ]]; then
     echo "rclone not found"
     echo "make sure to copy containers to container_dir manually"
     return
