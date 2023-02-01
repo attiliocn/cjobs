@@ -11,6 +11,7 @@ def write_job(
     containers_cloud_dir, 
     containers_local_dir,
     container,
+    singularity_version,
     job_input,
     job_input_in_script,
     job_tag,
@@ -37,7 +38,8 @@ def write_job(
     jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
     with open(f"{CJOBS_DIR}/extras/get_containers.sh") as f:
         jobfile.write(f.read()+'\n')
-    jobfile.write(f'get_containers {containers_cloud_dir} {containers_local_dir} \n\n')
+    jobfile.write(f'get_containers {containers_cloud_dir} {containers_local_dir}\n')
+    jobfile.write(f'module load singularity/{singularity_version}\n\n')
 
     # Write job directories to the job file
     jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')

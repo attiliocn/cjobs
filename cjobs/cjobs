@@ -72,6 +72,7 @@ SCHEDULER = config['SCHEDULER']['engine']
 SCRATCH_DIR = config['SCHEDULER']['scratch dir']
 CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
 CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
+SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
 
 # check if container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
@@ -144,6 +145,7 @@ else:
             containers_cloud_dir=CONTAINERS_CLOUD_DIR, 
             containers_local_dir=CONTAINERS_LOCAL_DIR,
             container=containers_data[args.container]['file'],
+            singularity_version=SINGULARITY_VERSION,
             job_input=job_input,
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
