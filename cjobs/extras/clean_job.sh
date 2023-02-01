@@ -2,7 +2,7 @@ function clean_job() {
   echo "Received SIG"
   if [[ -d "$job_scratch_dir" ]]; then
     echo "Copying outputs to local_dir"
-    cp -vr "$job_scratch_dir" "$job_local_dir"
+    cp -vr "$job_scratch_dir" "$job_local_dir"/"$job_name"
     echo "Removing scratch dir"
     rm -vrf "$job_scratch_dir"
     echo "Job done"
