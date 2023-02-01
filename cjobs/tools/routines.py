@@ -31,6 +31,8 @@ def build_xtb_routine(scrdir, n_cores, job_input, flags, container):
     --bind="${scrdir}":"${scrdir}" \\
     {container} \\
     "${scrdir}" \\
-    xtb "${job_input}" {" ".join(flags)} &> xtb.output'''
+    xtb "${job_input}" {" ".join(flags)} &> xtb.output &'''
 )
+    xtb_routine.append('wait')
+    xtb_routine.append('exit')
     return xtb_routine
