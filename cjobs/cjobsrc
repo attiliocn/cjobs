@@ -1,5 +1,6 @@
 [CONTAINERS]
     cloud dir = 
+    local dir =
 [SCHEDULER]
     engine = 
     scratch dir = 
