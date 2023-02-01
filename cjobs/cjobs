@@ -12,7 +12,7 @@ CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
 from tools.container_tools import request_containers_using_rclone, parse_containers_list
 from tools.scheduler_tools import build_scheduler_header
-from tools.routines import build_gaussian16_routine, build_xtb_routine
+from tools.routines import build_gaussian16_routine, build_xtb_routine, build_crest_routine
 
 parser = argparse.ArgumentParser()
 
@@ -168,6 +168,8 @@ elif args.subparser == 'xtb':
     jobfile.write('\n'.join(job_routine)+'\n')
 
 elif args.subparser == 'crest':
-    pass
+    job_routine = build_crest_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
+    jobfile.write('\n'.join(job_routine)+'\n')
+
 jobfile.close()
 exit()
