@@ -160,15 +160,15 @@ jobfile.write('\n')
 jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
 
 if args.subparser == 'gaussian':
-    job_routine = build_gaussian16_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
+    job_routine = build_gaussian16_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, container=f"{CONTAINERS_LOCAL_DIR}/{containers_data[args.container]['file']}")
     jobfile.write('\n'.join(job_routine)+'\n')
 
 elif args.subparser == 'xtb':
-    job_routine = build_xtb_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
+    job_routine = build_xtb_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=f"{CONTAINERS_LOCAL_DIR}/{containers_data[args.container]['file']}")
     jobfile.write('\n'.join(job_routine)+'\n')
 
 elif args.subparser == 'crest':
-    job_routine = build_crest_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=f"{SCRATCH_DIR}/containers/{containers_data[args.container]['file']}")
+    job_routine = build_crest_routine(scrdir=job_scratch_dir_in_script, n_cores=args.cores, job_input=job_input_in_script, flags=args.flags, container=f"{CONTAINERS_LOCAL_DIR}/{containers_data[args.container]['file']}")
     jobfile.write('\n'.join(job_routine)+'\n')
 
 jobfile.close()
