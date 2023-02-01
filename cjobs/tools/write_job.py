@@ -49,6 +49,7 @@ def write_job(
     jobfile.write(f'export {job_scratch_dir_in_script}={job_scratch_dir}\n')
     jobfile.write(f'mkdir -p "${job_scratch_dir_in_script}"\n')
     jobfile.write('\n')
+    jobfile.write(f'cd "${job_local_dir_in_script}"\n')
     jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
     if args.send_files:
         jobfile.write(f'# send additional files to scratch dir\n')
