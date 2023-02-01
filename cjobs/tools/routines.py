@@ -36,3 +36,21 @@ def build_xtb_routine(scrdir, n_cores, job_input, flags, container):
     xtb_routine.append('wait')
     xtb_routine.append('exit')
     return xtb_routine
+
+def build_crest_routine(scrdir, n_cores, job_input, flags, container):
+    crest_routine = []
+    crest_routine.append(f'export MKL_NUM_THREADS={n_cores}')
+    crest_routine.append(f'export OMP_NUM_THREADS={n_cores}')
+    crest_routine.append(f'export OMP_STACKSIZE=4G')
+    crest_routine.append(f'ulimit -s unlimited')
+    crest_routine.append(f'')
+    crest_routine.append(
+        f'''singularity run \\
+    --bind="${scrdir}":"${scrdir}" \\
+    {container} \\
+    "${scrdir}" \\
+    crest "${job_input}" {" ".join(flags)} &> crest.output &'''
+)
+    crest_routine.append('wait')
+    crest_routine.append('exit')
+    return crest_routine
