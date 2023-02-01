@@ -11,6 +11,8 @@ import pathlib
 CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
 from tools.container_tools import request_containers_using_rclone, parse_containers_list
+from tools.scheduler_tools import get_scheduler_variables
+from tools import write_job
 
 parser = argparse.ArgumentParser()
 
@@ -19,6 +21,7 @@ subparsers = parser.add_subparsers(required=True, dest='subparser')
 parser_cluster = subparsers.add_parser('cluster-setup', add_help=False)
 parser_cluster.add_argument("--container", required=True, help='.sif container ID. To list available containers use cjobs --list-containers')
 parser_cluster.add_argument("--send-files", nargs='+', required=False, help='send files from local to remote directory')
+parser_cluster.add_argument("--array", action='store_true', help='request a job array for multiple jobs')
 parser_cluster.add_argument("-c", "--cores", type=int, required=True, help='number of cores (CPUs) to be allocated')
 parser_cluster.add_argument("-m", "--memory-per-core", type=int, required=True, help='memory in MB per core required')
 parser_cluster.add_argument("-t", "--time", type=float, required=True, help='allocation time in hours')
@@ -65,7 +68,7 @@ except FileNotFoundError:
     print('Missing ~/.cjobsrc file')
     exit()
 
-QUEUE_SYSTEM = config['SCHEDULER']['engine']
+SCHEDULER = config['SCHEDULER']['engine']
 SCRATCH_DIR = config['SCHEDULER']['scratch dir']
 CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
 CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
@@ -85,35 +88,71 @@ totsec = duration.total_seconds()
 h = totsec//3600
 m = (totsec%3600) // 60
 sec =(totsec%3600)%60 #just for reference
-walltime = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
+args.time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
 
-# Set variables according to n_jobs and scheduler type
-# job_tag => single-job name or array name (unique)
-# job
-#
-n_jobs = len(args.job)
-if n_jobs == 1:
-    job_name_in_script = 'job_name'
-    job_input_in_script = 'job_input'
-    job_local_dir_in_script = 'job_local_dir'
-    job_scratch_dir_in_script = 'job_scratch_dir'
+# scheduler variables
+scheduler_variables = get_scheduler_variables(SCHEDULER)
 
-    job_input = args.job[0]
-    job_tag = pathlib.Path(args.job[0]).stem
-    job_name = job_tag
+# n_jobs = len(args.job)
+# if n_jobs == 1:
+#     job_name_in_script = 'job_name'
+#     job_input_in_script = 'job_input'
+#     job_local_dir_in_script = 'job_local_dir'
+#     job_scratch_dir_in_script = 'job_scratch_dir'
+
+#     job_input = args.job[0]
+#     job_tag = pathlib.Path(args.job[0]).stem
+#     job_name = job_tag
     
-    job_local_dir =f'{os.getcwd()}'
-    job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+#     job_local_dir =f'{os.getcwd()}'
+#     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+# else:
+#     # function that writes a input file
+#     job_input_in_script = f'job_input'
+#     job_name_in_script = 'job_name'
+#     job_local_dir_in_script = 'job_local_dir'
+#     job_scratch_dir_in_script = 'job_scratch_dir'  
+
+#     job_tag = "array_a85sy5"
+#     job_input = r"$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' $config)"
+#     job_name = '$(cut -f 1 -d \'.\' "$job_input")'
+    
+#     job_local_dir = f'{os.getcwd()}'
+#     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+
+
+if args.array and len(args.job) > 1:
+    pass
 else:
-    # function that writes a input file
-    job_input_in_script = f'job_input'
-    job_name_in_script = 'job_name'
-    job_local_dir_in_script = 'job_local_dir'
-    job_scratch_dir_in_script = 'job_scratch_dir'  
+    for job in args.job:      
+        job_input = job
+        job_input_in_script = 'job_input'
 
-    job_tag = "array_a85sy5"
-    job_input = r"$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' $config)"
-    job_name = '$(cut -f 1 -d \'.\' "$job_input")'
+        job_tag = pathlib.Path(args.job[0]).stem
+        job_name = job_tag
+        job_name_in_script = 'job_name'
+        
+        job_local_dir =f'{os.getcwd()}'
+        job_local_dir_in_script = 'job_local_dir'
+
+        job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
+        job_scratch_dir_in_script = 'job_scratch_dir'
+
+        write_job(
+            args,
+            scheduler=SCHEDULER, 
+            containers_cloud_dir=CONTAINERS_CLOUD_DIR, 
+            containers_local_dir=CONTAINERS_LOCAL_DIR,
+            container=containers_data[args.container]['file'],
+            job_input=job_input,
+            job_input_in_script=job_input_in_script,
+            job_tag=job_tag,
+            job_name=job_name,
+            job_name_in_script=job_name_in_script,
+            job_local_dir=job_local_dir,
+            job_local_dir_in_script=job_local_dir_in_script,
+            job_scratch_dir=job_scratch_dir,
+            job_scratch_dir_in_script=job_scratch_dir_in_script
+        )
+
     
-    job_local_dir = f'{os.getcwd()}'
-    job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
