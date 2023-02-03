@@ -41,22 +41,6 @@ parser_crest.add_argument('-f','--flags', nargs='+', default='', help='crest fla
 
 args = parser.parse_args()
 
-if args.subparser == 'listcontainers':
-    stdout, stderr = request_containers_using_rclone("sintcatmol:containers")
-
-    if stderr:
-        print(stderr)
-        print("Could not fetch containers list from Google Drive.\nCheck your configuration file and try again")
-    else:
-        containers = [i for i in stdout.split('\n')]
-        containers.sort()
-        print("{: <15}{: <25}{: <}".format('Container ID', "Build Time", "File"))
-        for container in containers:
-            container_data = container.replace('.sif','')
-            container_data = container_data.split('_')
-            print("{: <15}{: <25}{: <}".format(container_data[-1], container_data[-2], container))
-    exit()
-
 # read config file
 config = configparser.ConfigParser()
 config_file = os.path.join(os.environ['HOME'], '.cjobsrc')
@@ -73,6 +57,22 @@ SCRATCH_DIR = config['SCHEDULER']['scratch dir']
 CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
 CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
 SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
+
+if args.subparser == 'listcontainers':
+    stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
+
+    if stderr:
+        print(stderr)
+        print("Could not fetch containers list from Google Drive.\nCheck your configuration file and try again")
+    else:
+        containers = [i for i in stdout.split('\n')]
+        containers.sort()
+        print("{: <15}{: <25}{: <}".format('Container ID', "Build Time", "File"))
+        for container in containers:
+            container_data = container.replace('.sif','')
+            container_data = container_data.split('_')
+            print("{: <15}{: <25}{: <}".format(container_data[-1], container_data[-2], container))
+    exit()
 
 # check if container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
