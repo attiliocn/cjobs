@@ -91,7 +91,8 @@ def write_job(
             n_cores=args.cores, 
             job_input=job_input_in_script, 
             flags=args.flags, 
-            container=f"{containers_local_dir}/{container}"
+            container=f"{containers_local_dir}/{container}",
+            standalone=args.standalone
             )
         jobfile.write('\n'.join(job_routine)+'\n')
 
@@ -101,7 +102,8 @@ def write_job(
             n_cores=args.cores, 
             job_input=job_input_in_script, 
             flags=args.flags, 
-            container=f"{containers_local_dir}/{container}"
+            container=f"{containers_local_dir}/{container}",
+            standalone=args.standalone
             )
         jobfile.write('\n'.join(job_routine)+'\n')
 

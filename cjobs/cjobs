@@ -35,10 +35,12 @@ parser_gaussian.add_argument('-j','--job', nargs='+', required=True, help='gauss
 parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
 parser_xtb.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
 parser_xtb.add_argument('-f','--flags', nargs='+', default='', help='xTB flags')
+parser_xtb.add_argument('--standalone', action='store_true', help='Swap first flag with job input for standalone usage')
 
 parser_crest = subparsers.add_parser('crest', help="setup crest calculation", parents=[parser_cluster])
 parser_crest.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
 parser_crest.add_argument('-f','--flags', nargs='+', default='', help='crest flags')
+parser_crest.add_argument('--standalone', action='store_true', help='Swap first flag with job input for standalone usage')
 
 args = parser.parse_args()
 
