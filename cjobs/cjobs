@@ -123,7 +123,40 @@ scheduler_variables = get_scheduler_variables(SCHEDULER)
 
 
 if args.array and len(args.job) > 1:
-    pass
+
+    with open('queue.conf', mode='w') as f:
+        for i, job in enumerate(args.job):
+            f.write(f'{i+1},{job}\n')
+
+    job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\"' + r"'$1==ArrayTaskID {print $2}' queue.conf)"
+    job_input_in_script = 'job_input'
+
+    job_tag = "array_a85sy5"
+    job_name = fr"$(echo {job_input_in_script} | rev | cut -f 2- -d '.' | rev)"
+    job_name_in_script = 'job_name'
+
+    job_local_dir =f'{os.getcwd()}'
+    job_local_dir_in_script = 'job_local_dir'
+
+    job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
+    job_scratch_dir_in_script = 'job_scratch_dir'
+
+    write_job(
+            args,
+            scheduler=SCHEDULER, 
+            containers_cloud_dir=CONTAINERS_CLOUD_DIR, 
+            containers_local_dir=CONTAINERS_LOCAL_DIR,
+            container=containers_data[args.container]['file'],
+            singularity_version=SINGULARITY_VERSION,
+            job_input=job_input,
+            job_input_in_script=job_input_in_script,
+            job_tag=job_tag,
+            job_name=job_name,
+            job_local_dir=job_local_dir,
+            job_local_dir_in_script=job_local_dir_in_script,
+            job_scratch_dir=job_scratch_dir,
+            job_scratch_dir_in_script=job_scratch_dir_in_script
+        )
 else:
     for job in args.job:     
         job_input = job
