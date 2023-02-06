@@ -95,45 +95,11 @@ args.time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
 # scheduler variables
 scheduler_variables = get_scheduler_variables(SCHEDULER)
 
-# n_jobs = len(args.job)
-# if n_jobs == 1:
-#     job_name_in_script = 'job_name'
-#     job_input_in_script = 'job_input'
-#     job_local_dir_in_script = 'job_local_dir'
-#     job_scratch_dir_in_script = 'job_scratch_dir'
-
-#     job_input = args.job[0]
-#     job_tag = pathlib.Path(args.job[0]).stem
-#     job_name = job_tag
-    
-#     job_local_dir =f'{os.getcwd()}'
-#     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
-# else:
-#     # function that writes a input file
-#     job_input_in_script = f'job_input'
-#     job_name_in_script = 'job_name'
-#     job_local_dir_in_script = 'job_local_dir'
-#     job_scratch_dir_in_script = 'job_scratch_dir'  
-
-#     job_tag = "array_a85sy5"
-#     job_input = r"$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' $config)"
-#     job_name = '$(cut -f 1 -d \'.\' "$job_input")'
-    
-#     job_local_dir = f'{os.getcwd()}'
-#     job_scratch_dir = f'"{SCRATCH_DIR}/"${job_name_in_script}""'
-
-
 if args.array and len(args.job) > 1:
     # create the queue config file
     with open('queue.conf', mode='w') as f:
         for i, job in enumerate(args.job):
             f.write(f'{i+1},{job}\n')
-
-    # add queue.conf to send_files automatically
-    if not args.send_files:
-        args.send_files = ['queue.conf']
-    else:
-        args.send_files.append('queue.conf')
 
     job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
     job_scratch_dir_in_script = 'job_scratch_dir'
