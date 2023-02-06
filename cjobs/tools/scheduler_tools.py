@@ -29,7 +29,7 @@ def get_scheduler_variables(scheduler):
         scheduler_vars['array_task_id'] = '$SLURM_ARRAY_TASK_ID'
     elif scheduler == 'pbs-pro':
         scheduler_vars['job_id'] = '$PBS_JOBID'
-        scheduler_vars['array_tak_id'] = '$PBS_ARRAY_INDEX'
+        scheduler_vars['array_task_id'] = '$PBS_ARRAY_INDEX'
     else:
         return None
     return scheduler_vars
