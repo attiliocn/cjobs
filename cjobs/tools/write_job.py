@@ -26,7 +26,15 @@ def write_job(
     # Write scheduler header to the job file
     jobfile = open(f'job_{job_tag}.sh', mode='w')
     jobfile.write('#!/bin/bash\n')
-    scheduler_header = build_scheduler_header(scheduler=scheduler, job_name=job_tag, n_cores=args.cores, memory=args.memory_per_core, job_time=args.time)
+    scheduler_header = build_scheduler_header(
+        scheduler=scheduler, 
+        job_name=job_tag, 
+        n_cores=args.cores, 
+        memory=args.memory_per_core, 
+        job_time=args.time,
+        n_jobs=len(args.job),
+        job_array=args.array
+    )
     jobfile.write('\n'.join(scheduler_header)+'\n\n')
 
     # Write clean_job trap function to job file
