@@ -28,6 +28,7 @@ def build_xtb_routine(scrdir, n_cores, job_input, flags, container, standalone=F
     xtb_routine.append(f'ulimit -s unlimited')
     xtb_routine.append(f'')
     if standalone:
+        flags = flags.split(' ')
         xtb_routine.append(
             f'''singularity run \\
         --bind="${scrdir}":"${scrdir}" \\
@@ -41,7 +42,7 @@ def build_xtb_routine(scrdir, n_cores, job_input, flags, container, standalone=F
         --bind="${scrdir}":"${scrdir}" \\
         {container} \\
         "${scrdir}" \\
-        xtb "${job_input}" {" ".join(flags)} &> xtb.output &'''
+        xtb "${job_input}" {flags} &> xtb.output &'''
     )
     xtb_routine.append('wait')
     xtb_routine.append('exit')
@@ -55,6 +56,7 @@ def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone
     crest_routine.append(f'ulimit -s unlimited')
     crest_routine.append(f'')
     if standalone:
+        flags = flags.split(' ')
         crest_routine.append(
             f'''singularity run \\
         --bind="${scrdir}":"${scrdir}" \\
@@ -68,7 +70,7 @@ def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone
         --bind="${scrdir}":"${scrdir}" \\
         {container} \\
         "${scrdir}" \\
-        crest "${job_input}" {" ".join(flags)} &> xtb.output &'''
+        crest "${job_input}" {flags} &> xtb.output &'''
     )
     crest_routine.append('wait')
     crest_routine.append('exit')
