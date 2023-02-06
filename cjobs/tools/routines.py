@@ -62,7 +62,7 @@ def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone
         --bind="${scrdir}":"${scrdir}" \\
         {container} \\
         "${scrdir}" \\
-        crest {flags[0]} "${job_input}" {" ".join(flags[1:])} &> xtb.output &'''
+        crest {flags[0]} "${job_input}" {" ".join(flags[1:])} &> crest.output &'''
     )
     else:
         crest_routine.append(
@@ -70,7 +70,7 @@ def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone
         --bind="${scrdir}":"${scrdir}" \\
         {container} \\
         "${scrdir}" \\
-        crest "${job_input}" {flags} &> xtb.output &'''
+        crest "${job_input}" {flags} &> crest.output &'''
     )
     crest_routine.append('wait')
     crest_routine.append('exit')
