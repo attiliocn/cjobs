@@ -138,7 +138,7 @@ if args.array and len(args.job) > 1:
     job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
     job_scratch_dir_in_script = 'job_scratch_dir'
     
-    job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\"' + r"'$1==ArrayTaskID {print $2}' " + f'"{job_scratch_dir_in_script}"/queue.conf)'
+    job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\" ' + r"'$1==ArrayTaskID {print $2}' " + f'"{job_scratch_dir_in_script}"/queue.conf)'
     job_input_in_script = 'job_input'
 
     job_tag = f"array_{get_hash_from_timestamp()[:6]}"
