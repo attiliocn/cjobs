@@ -24,6 +24,7 @@ def get_scheduler_variables(scheduler):
     scheduler_vars = {}
     if scheduler == 'slurm':
         scheduler_vars['job_id'] = '$SLURM_JOB_ID'
+        scheduler_vars['array_task_id'] = '$SLURM_ARRAY_TASK_ID'
     elif scheduler == 'pbs-pro':
         scheduler_vars['job_id'] = '$PBS_JOBID'
     else:
