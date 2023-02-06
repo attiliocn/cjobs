@@ -142,7 +142,7 @@ if args.array and len(args.job) > 1:
     job_input_in_script = 'job_input'
 
     job_tag = f"array_{get_hash_from_timestamp()[:6]}"
-    job_name = fr"$(echo {job_input_in_script} | rev | cut -f 2- -d '.' | rev)"
+    job_name = fr"$(echo ${job_input_in_script} | rev | cut -f 2- -d '.' | rev)"
     job_name_in_script = 'job_name'
 
     job_local_dir =f'{os.getcwd()}'
