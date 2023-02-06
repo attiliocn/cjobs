@@ -51,19 +51,20 @@ def write_job(
 
     # Write job directories to the job file
     jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')
-    jobfile.write(f'export job_input={job_input}\n')
-    jobfile.write(f'export job_name={job_name}\n')
     jobfile.write(f'export {job_local_dir_in_script}="{job_local_dir}"\n')
     jobfile.write(f'export {job_scratch_dir_in_script}={job_scratch_dir}\n')
     jobfile.write(f'mkdir -p "${job_scratch_dir_in_script}"\n')
-    jobfile.write('\n')
     jobfile.write(f'cd "${job_local_dir_in_script}"\n')
-    jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
+    jobfile.write('\n')
     if args.send_files:
         jobfile.write(f'# send additional files to scratch dir\n')
         for file in args.send_files:
                 jobfile.write(f'cp "${job_local_dir_in_script}"/{file} "${job_scratch_dir_in_script}"\n')
         jobfile.write('\n')
+    jobfile.write(f'export job_input={job_input}\n')
+    jobfile.write(f'export job_name={job_name}\n')
+    jobfile.write('\n')
+    jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
     jobfile.write(f'cd "${job_scratch_dir_in_script}"\n')
     jobfile.write('\n')
 
