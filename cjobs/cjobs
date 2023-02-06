@@ -97,8 +97,6 @@ args.time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
 # scheduler variables
 scheduler_variables = get_scheduler_variables(SCHEDULER)
 
-print(args)
-
 if args.array and len(args.job) > 1:
     # create the queue config file
     with open('queue.conf', mode='w') as f:
