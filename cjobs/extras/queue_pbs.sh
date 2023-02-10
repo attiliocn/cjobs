@@ -2,6 +2,8 @@
 shopt -s expand_aliases
 source "$HOME"/.bashrc
 
+cd "$(dirname "$0")" # crontab runs in $HOME as default
+
 alias qstat='/opt/pbs/default/bin/qstat'
 alias qsub='/opt/pbs/default/bin/qsub'
 
@@ -14,8 +16,6 @@ fi
 
 num_jobs=$(wc -l <(qstat -u $USER | grep '.service') | awk '{print $1}')
 remaining_slots=$((20-num_jobs))
-
-cd "$(dirname "$0")" # crontab runs in $HOME as default, this line change this behavior
 
 if [[ "$remaining_slots" -gt 0 ]]; then
     echo "You can submit "$remaining_slots" more jobs"

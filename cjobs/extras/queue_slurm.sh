@@ -2,6 +2,8 @@
 shopt -s expand_aliases
 source "$HOME"/.bashrc
 
+cd "$(dirname "$0")" # crontab runs in $HOME as default
+
 jobs_queue='jobs_queue.txt'
 jobs_sent='jobs_sent.txt'
 
@@ -12,8 +14,6 @@ fi
 num_slots=50
 num_jobs=$(wc -l <(squeue -u $USER | tail -n +2) | awk '{print $1}')
 remaining_slots=$((num_slots-num_jobs))
-
-cd "$(dirname "$0")" # crontab runs in $HOME as default, this line change this behavior
 
 if [[ "$remaining_slots" -gt 0 ]]; then
     echo "You can submit "$remaining_slots" more jobs"
