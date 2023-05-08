@@ -20,6 +20,24 @@ def build_gaussian16_routine(scrdir, n_cores, job_input, container):
     g16_routine.append('exit')
     return g16_routine
 
+def build_orca5_routine(scrdir, n_cores, job_input, job_output, container):
+    orca5_routine = []
+    orca5_routine.append(f'export MKL_NUM_THREADS={n_cores}')
+    orca5_routine.append(f'export OMP_NUM_THREADS={n_cores}')
+    orca5_routine.append(f'export OMP_STACKSIZE=4G')
+    orca5_routine.append(f'ulimit -s unlimited')
+    orca5_routine.append(f'')
+    orca5_routine.append(
+        f'''singularity run \\
+    --bind="${scrdir}":"${scrdir}" \\
+    {container} \\
+    "${scrdir}" \\
+    "${job_input}" 1> "${job_output}".out 2> stderr.log &'''
+)
+    orca5_routine.append('wait')
+    orca5_routine.append('exit')
+    return orca5_routine
+
 def build_xtb_routine(scrdir, n_cores, job_input, flags, container, standalone=False):
     xtb_routine = []
     xtb_routine.append(f'export MKL_NUM_THREADS={n_cores}')

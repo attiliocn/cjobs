@@ -32,6 +32,9 @@ parser_containers = subparsers.add_parser('listcontainers', help='list all avail
 parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
 parser_gaussian.add_argument('-j','--job', nargs='+', required=True, help='gaussian input file')
 
+parser_gaussian = subparsers.add_parser('orca', help='setup a Gaussian calculation', parents=[parser_cluster])
+parser_gaussian.add_argument('-j','--job', nargs='+', required=True, help='gaussian input file')
+
 parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
 parser_xtb.add_argument('-j','--job', nargs='+', required=True, help='coordinates file')
 parser_xtb.add_argument('-f','--flags', type=str, default='', help='xTB flags')
@@ -127,6 +130,7 @@ if args.array and len(args.job) > 1:
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
             job_name=job_name,
+            job_name_in_script=job_name_in_script,
             job_local_dir=job_local_dir,
             job_local_dir_in_script=job_local_dir_in_script,
             job_scratch_dir=job_scratch_dir,
@@ -158,6 +162,7 @@ else:
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
             job_name=job_name,
+            job_name_in_script=job_name_in_script,
             job_local_dir=job_local_dir,
             job_local_dir_in_script=job_local_dir_in_script,
             job_scratch_dir=job_scratch_dir,
