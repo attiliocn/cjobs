@@ -3,7 +3,7 @@ import sys
 import pathlib
 
 from tools.scheduler_tools import build_scheduler_header
-from tools.routines import build_gaussian16_routine, build_xtb_routine, build_crest_routine
+from tools.routines import build_gaussian16_routine, build_orca5_routine, build_xtb_routine, build_crest_routine
 
 def write_job(
     args, 
@@ -16,6 +16,7 @@ def write_job(
     job_input_in_script,
     job_tag,
     job_name,
+    job_name_in_script,
     job_local_dir,
     job_local_dir_in_script,
     job_scratch_dir,
@@ -81,6 +82,16 @@ def write_job(
             scrdir=job_scratch_dir_in_script, 
             n_cores=args.cores, 
             job_input=job_input_in_script, 
+            container=f"{containers_local_dir}/{container}"
+            )
+        jobfile.write('\n'.join(job_routine)+'\n')
+
+    elif args.subparser == 'orca':
+        job_routine = build_orca5_routine(
+            scrdir=job_scratch_dir_in_script, 
+            n_cores=args.cores, 
+            job_input=job_input_in_script,
+            job_output=job_name_in_script,
             container=f"{containers_local_dir}/{container}"
             )
         jobfile.write('\n'.join(job_routine)+'\n')
