@@ -2,6 +2,7 @@
     cloud dir = 
     local dir =
     singularity version = 
+    container mode = 
 [SCHEDULER]
     engine = 
     scratch dir = 
