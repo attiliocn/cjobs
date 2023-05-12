@@ -1,14 +1,8 @@
+from .util import file_exists
 import subprocess
 
-###
 import os
 import time
-
-def file_exists(file_path):
-    if os.path.exists(file_path):
-        return True
-    else:
-        return False
 
 def is_cached_containers_file_old(file_path, tolerance_days=7):
     if not file_exists(file_path):
