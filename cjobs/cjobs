@@ -101,7 +101,7 @@ containers_list = [i for i in stdout.split('\n')]
 containers_data = parse_containers_list(containers_list)
 if args.container not in containers_data.keys():
     print(f'Invalid container. Container {args.container} not found!')
-    print('Use cjobs --listcontainers for a list of valid containers')
+    print('Use cjobs listcontainers for a list of valid containers')
     exit()
 
 # convert jobtime from hours to input format HH:MM:SS
