@@ -10,7 +10,7 @@ import pathlib
 
 CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
-from tools.container_tools import request_containers_using_rclone, parse_containers_list
+from tools.container_tools import file_exists, is_cached_containers_file_old, show_cached_containers_file_contents, request_containers_using_rclone, parse_containers_list
 from tools.scheduler_tools import get_scheduler_variables
 from tools.write_job import write_job
 from tools.util import get_hash_from_timestamp
@@ -58,27 +58,42 @@ except FileNotFoundError:
     print('Missing ~/.cjobsrc file')
     exit()
 
-SCHEDULER = config['SCHEDULER']['engine']
-SCRATCH_DIR = config['SCHEDULER']['scratch dir']
-CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
-CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
-SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
+try:
+    SCHEDULER = config['SCHEDULER']['engine']
+    SCRATCH_DIR = config['SCHEDULER']['scratch dir']
+    CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
+    CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
+    CONTAINER_MODE = config['CONTAINERS']['container mode']
+    SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
+except KeyError:
+    print("\nERROR: Your .cjobsrc file is outdated.\nPlease refer to the documentation to find the current version and update it accordingly.\n")
 
+# containers cached file
+containers_avail_file = os.path.join(os.environ['HOME'], '.config', 'cjobs', 'containers.txt')
 if args.subparser == 'listcontainers':
-    stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
-
-    if stderr:
-        print(stderr)
-        print("Could not fetch containers list from Google Drive.\nCheck your configuration file and try again")
+    if is_cached_containers_file_old(containers_avail_file):
+        print("Updating the cached containers list")
+        stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
+        if stderr:
+            print(stderr)
+            print("Could not fetch containers list from Google Drive.\nCheck your configuration file and try again")
+            exit()
+        else:
+            containers = [i for i in stdout.split('\n')]
+            containers.sort()
+            with open(containers_avail_file, mode='w') as container_file:
+                container_file.write("{: <15}{: <25}{: <}\n".format('Container ID', "Build Time", "File"))
+                for container in containers:
+                    container_data = container.replace('.sif','')
+                    container_data = container_data.split('_')
+                    container_file.write("{: <15}{: <25}{: <}\n".format(container_data[-1], container_data[-2], container))
+            print("Update completed\n")
+            show_cached_containers_file_contents(containers_avail_file)
+            exit()
     else:
-        containers = [i for i in stdout.split('\n')]
-        containers.sort()
-        print("{: <15}{: <25}{: <}".format('Container ID', "Build Time", "File"))
-        for container in containers:
-            container_data = container.replace('.sif','')
-            container_data = container_data.split('_')
-            print("{: <15}{: <25}{: <}".format(container_data[-1], container_data[-2], container))
-    exit()
+        print("Displaying containers from the cached file\n")
+        show_cached_containers_file_contents(containers_avail_file)
+        exit()
 
 # check if container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)

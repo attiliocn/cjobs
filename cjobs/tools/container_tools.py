@@ -1,5 +1,33 @@
 import subprocess
 
+###
+import os
+import time
+
+def file_exists(file_path):
+    if os.path.exists(file_path):
+        return True
+    else:
+        return False
+
+def is_cached_containers_file_old(file_path, tolerance_days=7):
+    if not file_exists(file_path):
+        return True
+    else:
+        # Check if the cached file is more than 1 week old
+        file_age = time.time() - os.path.getmtime(file_path)
+        if file_age > (tolerance_days*24*60*60):  # t(seconds) = days * 24 h * 60 min * 60 sec
+            return True
+        else:
+            return False
+
+def show_cached_containers_file_contents(file_path):
+    if file_exists(file_path):
+        # Read and display the contents of the cached file
+        with open(file_path, 'r') as file:
+            contents = file.read()
+            print(contents)
+
 def request_containers_using_rclone(remote_path):
     cli_string = f"rclone lsf {remote_path} | grep .sif"
     process = subprocess.run(cli_string, capture_output=True, shell=True)
