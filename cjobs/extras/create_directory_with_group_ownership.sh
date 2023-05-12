@@ -16,9 +16,17 @@ function create_directory_with_group_ownership() {
         echo "Group ownership set to GID: $gid"
         echo "Permissions set to rwx for owner and group, and none for others."
     else
-        echo "Directory already exists: "$directory". Only the permissions settings will be applied"
-        # Change the group ownership by GID
-        chown -R :"$gid" "$parent_directory"
-        chmod -R 770 "$parent_directory"
+        echo "Directory already exists: "$directory"."
+        directory_owner=$(stat -c "%U" "$parent_directory")
+
+        if [ $USER = $directory_owner ]; then
+            echo "The user $USER is the owner of the directory. Applying standard permission settings"
+            # Change the group ownership by GID
+            chown -R :"$gid" "$parent_directory"
+            chmod -R 770 "$parent_directory"
+        else
+            echo "The user $USER is not the owner of the directory. There is nothing to do"
+            return
+        fi
     fi
 }
