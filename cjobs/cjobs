@@ -14,18 +14,21 @@ from tools.container_tools import is_cached_containers_file_old, show_cached_con
 from tools.scheduler_tools import get_scheduler_variables
 from tools.write_job import write_job
 from tools.util import get_hash_from_timestamp
+from tools.config import config_cjobs_defaults
 
 parser = argparse.ArgumentParser()
 
 subparsers = parser.add_subparsers(required=True, dest='subparser')
 
-parser_cluster = subparsers.add_parser('cluster-setup', add_help=False)
+parser_cluster = subparsers.add_parser('job-setup', add_help=False)
 parser_cluster.add_argument("--container", required=True, help='.sif container ID. To list available containers use cjobs --list-containers')
 parser_cluster.add_argument("--send-files", nargs='+', required=False, help='send files from local to remote directory')
 parser_cluster.add_argument("--array", action='store_true', help='request a job array for multiple jobs')
 parser_cluster.add_argument("-c", "--cores", type=int, required=True, help='number of cores (CPUs) to be allocated')
 parser_cluster.add_argument("-m", "--memory-per-core", type=int, required=True, help='memory in MB per core required')
 parser_cluster.add_argument("-t", "--time", type=float, required=True, help='allocation time in hours')
+
+parser_containers = subparsers.add_parser('config', help='Create the configuration directory for cjobs and initialize the settings with default options. IMPORTANT: Please review the default options carefully and make necessary adjustments before using the program.')
 
 parser_containers = subparsers.add_parser('listcontainers', help='list all available containers')
 
@@ -47,15 +50,20 @@ parser_crest.add_argument('--standalone', action='store_true', help='Swap first 
 
 args = parser.parse_args()
 
+config_dir = os.path.join(os.environ['HOME'], '.config', 'cjobs')
+config_file = os.path.join(config_dir, 'cjobsrc')
+
+if args.subparser == 'config':
+    config_cjobs_defaults(config_dir, config_file)
+    exit()
+
 # read config file
 config = configparser.ConfigParser()
-config_file = os.path.join(os.environ['HOME'], '.config', 'cjobs', '.cjobsrc')
 try:
     with open(config_file) as f:
         config.read_file(f)
 except FileNotFoundError:
     print('Error: Configuration file not found.')
-    print('Missing ~/.cjobsrc file')
     exit()
 
 try:
@@ -71,7 +79,7 @@ except KeyError:
     exit()
 
 # containers cached file
-containers_avail_file = os.path.join(os.environ['HOME'], '.config', 'cjobs', 'containers.txt')
+containers_avail_file = os.path.join(config_dir, 'containers.txt')
 if args.subparser == 'listcontainers':
     if is_cached_containers_file_old(containers_avail_file):
         print("Updating the cached containers list")
