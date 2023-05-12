@@ -48,11 +48,11 @@ def write_job(
     jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
     with open(f"{CJOBS_DIR}/extras/create_directory_with_group_ownership.sh") as f:
         jobfile.write(f.read()+'\n')
-    jobfile.write(f'create_directory_with_group_ownership {containers_local_dir}/containers {shared_gid}\n\n')
+    jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n\n')
 
     with open(f"{CJOBS_DIR}/extras/fetch_containers_from_drive.sh") as f:
         jobfile.write(f.read()+'\n')
-    jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}/containers\n\n')
+    jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n\n')
     
     jobfile.write(f'module load singularity/{singularity_version}\n\n')
 
