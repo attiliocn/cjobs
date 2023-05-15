@@ -2,12 +2,8 @@ function create_directory_with_group_ownership() {
     directory=$1 # a three level folder structure is expected like PARENT/f1/f2 
     gid=$2
     parent_directory=$(dirname "$directory") # refers to f1 in the strucuture above
-
-    # Create the lock file
+    
     lock_file="$parent_directory"/permissions.lock
-    touch "$lock_file"
-    echo "Lock file permissions.lock is placed"
-
     max_wait_time=$((2 * 60))  # 2 minutes in seconds
     wait_time=0
 
@@ -24,6 +20,10 @@ function create_directory_with_group_ownership() {
             wait_time=$((wait_time + 5))
         done
     fi
+    
+    # Create the lock file
+    touch "$lock_file"
+    echo "Lock file permissions.lock is placed"
 
     # Check if the directory exists
     if [ ! -d "$directory" ]; then
