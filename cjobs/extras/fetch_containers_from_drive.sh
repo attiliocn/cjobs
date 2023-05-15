@@ -38,6 +38,8 @@ function fetch_containers_from_drive() {
 
     if [[ ! -x  "$(command -v rclone)" ]]; then
         echo "The rclone command is unavailable. No synchronization will be performed."
+        rm "$lock_file"
+        echo "Lock file removed."
         return
     fi
   
