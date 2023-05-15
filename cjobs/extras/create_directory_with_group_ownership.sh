@@ -7,23 +7,21 @@ function create_directory_with_group_ownership() {
     max_wait_time=$((2 * 60))  # 2 minutes in seconds
     wait_time=0
 
-    # Check if the lock file exists
-    if [ -e "$lock_file" ]; then
-        echo "Lock file already exists. Another instance of the script may be running."
-        while [ -e "$lock_file" ]; do
-            if [ "$wait_time" -gt "$max_wait_time" ]; then
+    # Attempt to acquire the lock
+    while true; do
+        exec 3>"$lock_file"
+        if flock -n 3; then
+        echo "Successfully acquired lock to set folder permissions."
+            break
+        fi
+        echo "Waiting for the lock to be released..."
+        sleep 5
+        wait_time=$((wait_time + 5))
+        if [ "$wait_time" -gt "$max_wait_time" ]; then
                 echo "Maximum wait time exceeded. Exiting..."
                 exit 1
             fi
-            echo "Waiting for the lock to be released..."
-            sleep 5
-            wait_time=$((wait_time + 5))
-        done
-    fi
-    
-    # Create the lock file
-    touch "$lock_file"
-    echo "Lock file permissions.lock is placed"
+    done
 
     # Check if the directory exists
     if [ ! -d "$directory" ]; then
@@ -38,9 +36,10 @@ function create_directory_with_group_ownership() {
         echo "Group ownership set to GID: $gid"
         echo "Permissions set to rwx for owner and group, and none for others."
         
-        # remove the lock file
-        rm "$lock_file"
-        echo "Lock file removed. Actions completed successfully."
+        # Release the lock
+        exec 3>&-
+        rm $lock_file
+        echo "The lock has been released."
     else
         echo "Directory already exists: "$directory"."
         directory_owner=$(stat -c "%U" "$parent_directory")
@@ -52,15 +51,17 @@ function create_directory_with_group_ownership() {
             chown -R :"$gid" "$parent_directory"
             chmod -R 770 "$parent_directory"
             
-            # remove the lock file
-            rm "$lock_file"
-            echo "Lock file removed. Actions completed successfully."
+            # Release the lock
+            exec 3>&-
+            rm $lock_file
+            echo "The lock has been released."
         else
             echo "The user $USER is not the owner of the directory "$parent_directory". There is nothing to do"
 
-            # remove the lock file
-            rm "$lock_file"
-            echo "Lock file removed. Actions completed successfully."
+            # Release the lock
+            exec 3>&-
+            rm $lock_file
+            echo "The lock has been released."
             return
         fi
     fi
