@@ -32,16 +32,14 @@ function fetch_containers_from_drive() {
         fi
     fi
 
+    if [[ ! -x  "$(command -v rclone)" ]]; then
+        echo "The rclone command is unavailable. No synchronization will be performed."
+        return
+    fi
+
     # Create the lock file
     touch "$lock_file"
     echo "Lock file is placed"
-
-    if [[ ! -x  "$(command -v rclone)" ]]; then
-        echo "The rclone command is unavailable. No synchronization will be performed."
-        rm "$lock_file"
-        echo "Lock file removed."
-        return
-    fi
   
     rclone sync -v "$container_cloud_dir" "$container_local_dir"
     
