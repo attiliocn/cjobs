@@ -7,6 +7,7 @@ function create_directory_with_group_ownership() {
     max_wait_time=$((2 * 60))  # 2 minutes in seconds
     wait_time=0
 
+    echo  "Attempting to acquire lock for setting folder permissions."
     # Attempt to acquire the lock
     while true; do
         exec 3>"$lock_file"
