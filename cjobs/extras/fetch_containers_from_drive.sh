@@ -53,6 +53,5 @@ function fetch_containers_from_drive() {
     exec 3>&-
     echo "The lock has been released."
     touch $synced_file
-    echo "Updated last_sync.lock file"
-    
+    echo "Updated last_sync.lock file"  
 }
