@@ -39,6 +39,7 @@ function create_directory_with_group_ownership() {
         
         # Release the lock
         exec 3>&-
+        rm $lock_file
         echo "The lock has been released."
     else
         echo "Directory already exists: "$directory"."
@@ -53,12 +54,14 @@ function create_directory_with_group_ownership() {
             
             # Release the lock
             exec 3>&-
+            rm $lock_file
             echo "The lock has been released."
         else
             echo "The user $USER is not the owner of the directory "$parent_directory". There is nothing to do"
 
             # Release the lock
             exec 3>&-
+            rm $lock_file
             echo "The lock has been released."
             return
         fi
