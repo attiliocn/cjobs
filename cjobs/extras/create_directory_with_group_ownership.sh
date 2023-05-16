@@ -6,21 +6,6 @@ function create_directory_with_group_ownership() {
     max_wait_time=$((2 * 60))
     wait_time=0
 
-    # Helper function to acquire the lock
-    acquire_lock() {
-        exec 3>"$lock_file"
-        flock -n 3
-        echo "Successfully acquired lock."
-    }
-
-    # Helper function to release the lock
-    release_lock() {
-        exec 3>&-
-        rm "$lock_file"
-        echo "The lock has been released."
-        
-    }
-
     # Creates the parent directory if it doesn't exist
     if [ ! -d "$parent_directory" ]; then
         mkdir -p "$parent_directory"

@@ -9,20 +9,6 @@ function fetch_containers_from_drive() {
     max_wait_time=$((30 * 60))
     wait_time=0
 
-    # Helper function to acquire the lock
-    acquire_lock() {
-        exec 3>"$lock_file"
-        flock -n 3
-        echo "Successfully acquired lock."
-    }
-
-    # Helper function to release the lock
-    release_lock() {
-        exec 3>&-
-        rm "$lock_file"
-        echo "The lock has been released."
-    }
-
     echo "Attempting to acquire lock for RClone usage."
 
     # Attempt to acquire the lock

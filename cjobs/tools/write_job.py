@@ -46,6 +46,10 @@ def write_job(
 
     # Write container settings to the job file
     jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
+
+    with open(f"{CJOBS_DIR}/extras/lock_utils.sh") as f:
+        jobfile.write(f.read()+'\n')
+
     with open(f"{CJOBS_DIR}/extras/create_directory_with_group_ownership.sh") as f:
         jobfile.write(f.read()+'\n')
     jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n\n')
