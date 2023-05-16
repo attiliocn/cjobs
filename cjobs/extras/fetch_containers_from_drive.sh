@@ -34,7 +34,6 @@ function fetch_containers_from_drive() {
             echo "The last sync was done "$file_age" seconds ago. Actions will not be performed."
             # Release the lock
             exec 3>&-
-            rm $lock_file
             echo "The lock has been released."
             return
         fi
@@ -45,18 +44,14 @@ function fetch_containers_from_drive() {
         echo "The rclone command is unavailable. No synchronization will be performed."
         # Release the lock
         exec 3>&-
-        rm $lock_file
         echo "The lock has been released."
         return
     fi
   
     rclone sync -v "$container_cloud_dir" "$container_local_dir"
-    
     # Release the lock
     exec 3>&-
-    rm $lock_file
     echo "The lock has been released."
-
     touch $synced_file
     echo "Updated last_sync.lock file"
     
