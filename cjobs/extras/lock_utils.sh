@@ -6,9 +6,9 @@ acquire_lock() {
     exec 3>"$lock_file"
     if flock -n -e 3; then
         echo "Successfully acquired lock for $lock_name at $lock_location."
-        return true
+        return 0
     else
-        return false
+        return 1
     fi
 }
 
