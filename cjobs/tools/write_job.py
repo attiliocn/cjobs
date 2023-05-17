@@ -50,7 +50,7 @@ def write_job(
     with open(f"{CJOBS_DIR}/extras/lock_utils.sh") as f:
         jobfile.write(f.read()+'\n\n')
 
-    jobfile.write(f'attempt_acquire_lock "$USER"_sync /scratch 3600\n\n')
+    jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock /scratch 3600\n\n')
 
     with open(f"{CJOBS_DIR}/extras/create_directory_with_group_ownership.sh") as f:
         jobfile.write(f.read()+'\n')
@@ -60,7 +60,7 @@ def write_job(
         jobfile.write(f.read()+'\n')
     jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n\n')
 
-    jobfile.write(f'release_lock "$USER"_sync\n\n')
+    jobfile.write(f'release_lock "$USER"_sync.lock /scratch\n\n')
     
     jobfile.write(f'module load singularity/{singularity_version}\n\n')
 
