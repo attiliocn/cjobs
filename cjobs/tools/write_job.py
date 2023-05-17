@@ -13,6 +13,7 @@ def write_job(
     container,
     shared_gid,
     singularity_version,
+    scratch_dir,
     job_input,
     job_input_in_script,
     job_tag,
@@ -55,7 +56,7 @@ def write_job(
     
     jobfile.write(f'\n')
     jobfile.write(f'echo "Requesting lock for synchronization using rclone."\n')
-    jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock /scratch 3600\n')
+    jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock {scratch_dir} 3600\n')
     jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n')
     jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n')
     jobfile.write(f'release_lock "$USER"_sync.lock /scratch\n\n')

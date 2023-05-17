@@ -69,6 +69,7 @@ except FileNotFoundError:
 try:
     SCHEDULER = config['SCHEDULER']['engine']
     SCRATCH_DIR = config['SCHEDULER']['scratch dir']
+    PERSONAL_SCRATCH_DIR = config['SCHEDULER']['personal scratch dir']
     CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
     CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
     CONTAINER_MODE = config['CONTAINERS']['container mode']
@@ -131,7 +132,7 @@ if args.array and len(args.job) > 1:
         for i, job in enumerate(args.job):
             f.write(f'{i+1},{job}\n')
 
-    job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
+    job_scratch_dir = f"\"{PERSONAL_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
     job_scratch_dir_in_script = 'job_scratch_dir'
     
     job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\" ' + r"'$1==ArrayTaskID {print $2}' " + f'"${job_scratch_dir_in_script}"/queue.conf)'
@@ -152,6 +153,7 @@ if args.array and len(args.job) > 1:
             container=containers_data[args.container]['file'],
             shared_gid = SHARED_GID,
             singularity_version=SINGULARITY_VERSION,
+            scratch_dir=SCRATCH_DIR,
             job_input=job_input,
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
@@ -174,7 +176,7 @@ else:
         job_local_dir =f'{os.getcwd()}'
         job_local_dir_in_script = 'job_local_dir'
 
-        job_scratch_dir = f"\"{SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"\""
+        job_scratch_dir = f"\"{PERSONAL_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"\""
         job_scratch_dir_in_script = 'job_scratch_dir'
 
         write_job(
@@ -185,6 +187,7 @@ else:
             container=containers_data[args.container]['file'],
             shared_gid = SHARED_GID,
             singularity_version=SINGULARITY_VERSION,
+            scratch_dir=SCRATCH_DIR,
             job_input=job_input,
             job_input_in_script=job_input_in_script,
             job_tag=job_tag,
