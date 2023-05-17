@@ -1,4 +1,4 @@
-acquire_lock() {
+function acquire_lock() {
     local lock_name=$1
     local lock_location=$2
     local lock_file="$lock_location/$lock_name"
@@ -11,8 +11,7 @@ acquire_lock() {
         return 1
     fi
 }
-
-release_lock() {
+function release_lock() {
     local lock_name=$1
     local lock_location=$2
     local lock_file="$lock_location"/"$lock_name"
@@ -21,8 +20,7 @@ release_lock() {
     rm "$lock_file"
     echo "The lock for $lock_name at $lock_location has been released."
 }
-
-attempt_acquire_lock() {
+function attempt_acquire_lock() {
     local lock_name=$1
     local lock_location=$2
     local max_wait_time=$3
