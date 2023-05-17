@@ -59,7 +59,7 @@ def write_job(
     jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock {scratch_dir} 3600\n')
     jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n')
     jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n')
-    jobfile.write(f'release_lock "$USER"_sync.lock /scratch\n\n')
+    jobfile.write(f'release_lock "$USER"_sync.lock {scratch_dir}\n\n')
     
     jobfile.write(f'module load singularity/{singularity_version}\n\n')
 
