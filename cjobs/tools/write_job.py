@@ -46,20 +46,18 @@ def write_job(
 
     # Write container settings to the job file
     jobfile.write("{:#^80}".format('  CONTAINER SETTINGS  ')+'\n') 
-
     with open(f"{CJOBS_DIR}/extras/lock_utils.sh") as f:
-        jobfile.write(f.read()+'\n\n')
-
-    jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock /scratch 3600\n\n')
-
+        jobfile.write(f.read()+'\n')
     with open(f"{CJOBS_DIR}/extras/create_directory_with_group_ownership.sh") as f:
         jobfile.write(f.read()+'\n')
-    jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n\n')
-
     with open(f"{CJOBS_DIR}/extras/fetch_containers_from_drive.sh") as f:
         jobfile.write(f.read()+'\n')
-    jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n\n')
-
+    
+    jobfile.write(f'\n')
+    jobfile.write(f'echo "Requesting lock for synchronization using rclone."\n')
+    jobfile.write(f'attempt_acquire_lock "$USER"_sync.lock /scratch 3600\n')
+    jobfile.write(f'create_directory_with_group_ownership {containers_local_dir} {shared_gid}\n')
+    jobfile.write(f'fetch_containers_from_drive {containers_cloud_dir} {containers_local_dir}\n')
     jobfile.write(f'release_lock "$USER"_sync.lock /scratch\n\n')
     
     jobfile.write(f'module load singularity/{singularity_version}\n\n')
@@ -76,8 +74,8 @@ def write_job(
          jobfile.write(f'cp "${job_local_dir_in_script}"/queue.conf "${job_scratch_dir_in_script}"\n')
          jobfile.write('\n')
 
-    jobfile.write(f'export job_input={job_input}\n')
-    jobfile.write(f'export job_name={job_name}\n')
+    jobfile.write(f'export {job_input_in_script}={job_input}\n')
+    jobfile.write(f'export {job_name_in_script}={job_name}\n')
     jobfile.write('\n')
     if args.send_files:
         jobfile.write(f'# send additional files to scratch dir\n')
@@ -86,6 +84,8 @@ def write_job(
     jobfile.write('\n')
     jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
     jobfile.write(f'cd "${job_scratch_dir_in_script}"\n')
+    jobfile.write('\n')
+    jobfile.write(f'echo "Job Name: "${job_name_in_script}""\n')
     jobfile.write('\n')
 
     # Write software settings to the job file
