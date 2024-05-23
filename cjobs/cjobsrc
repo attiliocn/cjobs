@@ -1,13 +1,13 @@
-[CONTAINERS]
-    cloud dir = 
-    local dir =
-    singularity version = 
-    container mode = 
-
 [SCHEDULER]
     engine = 
     scratch dir = 
-    personal scratch dir = 
+    user scratch dir = 
+
+[CONTAINERS]
+    cloud dir = 
+    local dir =
+    container mode = 
+    singularity version = 
 
 [FILE MANAGEMENT]
     shared gid = 
