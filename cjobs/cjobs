@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
+
 import configparser
 import datetime
 import os
 import pathlib
 import sys
 
-CJOBS_DIR = sys.path[0]
-sys.path.append(CJOBS_DIR)
 from tools.arguments import create_argument_parser
 from tools.config import config_cjobs_defaults
 from tools.container_tools import (is_cached_containers_file_old,
@@ -18,41 +17,47 @@ from tools.scheduler_tools import get_scheduler_variables
 from tools.util import get_hash_from_timestamp
 from tools.write_job import write_job
 
+# settings paths and files
+CJOBS_DIR = sys.path[0]
+sys.path.append(CJOBS_DIR)
+config_dir = os.path.join(os.environ['HOME'], '.config', 'cjobs')
+containers_avail_file = os.path.join(config_dir, 'containers.txt')
+config_file = os.path.join(config_dir, 'cjobsrc')
 
+# parse cli arguments
 parser = create_argument_parser()
 args = parser.parse_args()
 
-config_dir = os.path.join(os.environ['HOME'], '.config', 'cjobs')
-config_file = os.path.join(config_dir, 'cjobsrc')
-
+# check current cjobs settings
 if args.subparser == 'config':
     config_cjobs_defaults(config_dir, config_file)
     exit()
+else:
+    config = configparser.ConfigParser()
+    try:
+        with open(config_file) as f:
+            config.read_file(f)
+        try:
+            SCHEDULER = config['SCHEDULER']['engine']
+            SCRATCH_DIR = config['SCHEDULER']['scratch dir']
+            USER_SCRATCH_DIR = config['SCHEDULER']['user scratch dir']
+            CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
+            CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
+            CONTAINER_MODE = config['CONTAINERS']['container mode']
+            SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
+            SHARED_GID = config['FILE MANAGEMENT']['shared gid']
+        except KeyError:
+            print(
+                "ERROR: Your .cjobsrc file is outdated.\n"
+                "Please refer to the documentation to find\n"
+                "the current version and update it accordingly."
+            )
+            exit()
+    except FileNotFoundError:
+        print('Error: Configuration file not found.')
+        exit()
 
-# read config file
-config = configparser.ConfigParser()
-try:
-    with open(config_file) as f:
-        config.read_file(f)
-except FileNotFoundError:
-    print('Error: Configuration file not found.')
-    exit()
-
-try:
-    SCHEDULER = config['SCHEDULER']['engine']
-    SCRATCH_DIR = config['SCHEDULER']['scratch dir']
-    PERSONAL_SCRATCH_DIR = config['SCHEDULER']['personal scratch dir']
-    CONTAINERS_CLOUD_DIR = config['CONTAINERS']['cloud dir']
-    CONTAINERS_LOCAL_DIR = config['CONTAINERS']['local dir']
-    CONTAINER_MODE = config['CONTAINERS']['container mode']
-    SINGULARITY_VERSION = config['CONTAINERS']['singularity version']
-    SHARED_GID = config['FILE MANAGEMENT']['shared gid']
-except KeyError:
-    print("\nERROR: Your .cjobsrc file is outdated.\nPlease refer to the documentation to find the current version and update it accordingly.\n")
-    exit()
-
-# containers cached file
-containers_avail_file = os.path.join(config_dir, 'containers.txt')
+# list available containers
 if args.subparser == 'listcontainers':
     if is_cached_containers_file_old(containers_avail_file):
         print("Updating the cached containers list")
@@ -78,13 +83,15 @@ if args.subparser == 'listcontainers':
         show_cached_containers_file_contents(containers_avail_file)
         exit()
 
-# check if container is valid
+# check if the provided container is valid
 stdout, stderr = request_containers_using_rclone(CONTAINERS_CLOUD_DIR)
 containers_list = [i for i in stdout.split('\n')]
 containers_data = parse_containers_list(containers_list)
 if args.container not in containers_data.keys():
-    print(f'Invalid container. Container {args.container} not found!')
-    print('Use cjobs listcontainers for a list of valid containers')
+    print(
+        f'Invalid container. Container {args.container} not found.\n'
+        'Use \'cjobs listcontainers\' for a list of valid containers'
+    )
     exit()
 
 # convert jobtime from hours to input format HH:MM:SS
@@ -95,16 +102,17 @@ m = (totsec%3600) // 60
 sec =(totsec%3600)%60 #just for reference
 args.time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
 
-# scheduler variables
+# get scheduler variables
 scheduler_variables = get_scheduler_variables(SCHEDULER)
 
+# write jobs
 if args.array and len(args.job) > 1:
     # create the queue config file
     with open('queue.conf', mode='w') as f:
         for i, job in enumerate(args.job):
             f.write(f'{i+1},{job}\n')
 
-    job_scratch_dir = f"\"{PERSONAL_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
+    job_scratch_dir = f"\"{USER_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
     job_scratch_dir_in_script = 'job_scratch_dir'
     
     job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\" ' + r"'$1==ArrayTaskID {print $2}' " + f'"${job_scratch_dir_in_script}"/queue.conf)'
@@ -148,7 +156,7 @@ else:
         job_local_dir =f'{os.getcwd()}'
         job_local_dir_in_script = 'job_local_dir'
 
-        job_scratch_dir = f"\"{PERSONAL_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"\""
+        job_scratch_dir = f"\"{USER_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"\""
         job_scratch_dir_in_script = 'job_scratch_dir'
 
         write_job(
