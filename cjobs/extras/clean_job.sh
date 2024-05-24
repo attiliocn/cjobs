@@ -1,11 +1,11 @@
 function clean_job() {
     echo "NOTICE: Received signal. The trap has been activated."
-    if [[ -d "$job_scratch_dir" ]]; then
+    if [[ -d "$exeDir" ]]; then
         echo "Copying outputs to local directory."
-        cp -vr "$job_scratch_dir" "$job_local_dir"/"$job_name"
+        rsync -avh "$exeDir"/ "$localDir"
         echo "Successfully copied outputs."
         echo "Removing scratch directory."
-        rm -vrf "$job_scratch_dir"
+        rm -vrf "$exeDir"
         echo "Scratch directory removed."
         echo "Job completed."
         echo ""
