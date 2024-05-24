@@ -28,35 +28,7 @@ def get_jobfile(jobInfo:object):
 
     jobfile.extend(scheduler_header)
     jobfile.append('')
-
-    # append local variables definitions to job file
-    jobfile.append("{:#^40}".format('  ENVIRONMENT  '))
-    jobfile.append('')
-        
-    jobfile.append('# local environment')
-    jobfile.append(f'localDir="{jobInfo.localDir}"')
-    jobfile.append('')
-
-    jobfile.append('# execution environment')
-    jobfile.append(f'scrDir="{jobInfo.scrDir}"')
-    jobfile.append(f'exeDir="{jobInfo.exeDir}"')
-    jobfile.append('')
-
-    jobfile.append('# containers')
-    jobfile.append(f'ctDir_remote="{jobInfo.ctDir_remote}"')
-    jobfile.append(f'ctDir_local="{jobInfo.ctDir_local}"')
-    jobfile.append(f'ct="{jobInfo.container}"')
-    jobfile.append('')
-
-    jobfile.append('# job variables')
-    if jobInfo.isArray:
-        jobfile.append(f'jobs={jobInfo.schedulerID}')
-        jobfile.append(f'basenames="{jobInfo.basenames}"')
-    else:
-        jobfile.append(f'jobs=({util.py_array_to_bash(jobInfo.filenames)})')
-        jobfile.append(f'basenames=({util.py_array_to_bash(jobInfo.basenames)})')
-    jobfile.append('')
-   
+ 
     # write function definitions to jobfile
     jobfile.append("{:#^40}".format('  FUNCTIONS  '))
     jobfile.append('') 
@@ -68,6 +40,8 @@ def get_jobfile(jobInfo:object):
         jobfile.append(f.read())
     with open(f"{CJOBS_DIR}/extras/fetch_containers_from_drive.sh") as f:
         jobfile.append(f.read())
+    with open(f"{CJOBS_DIR}/extras/get_csv_element.sh") as f:
+        jobfile.append(f.read())
 
     jobfile.append('')
     # write jobsteps to jobfile
@@ -77,13 +51,24 @@ def get_jobfile(jobInfo:object):
     jobfile.append('# trap signals if the job is either done or interrupted')
     jobfile.append('trap clean_job EXIT HUP INT TERM ERR')
     jobfile.append('')
+        
+    jobfile.append('# relevant directories')
+    jobfile.append(f'localDir="{jobInfo.localDir}"')
+    jobfile.append(f'scrDir="{jobInfo.scrDir}"')
+    jobfile.append(f'usrScrDir="{jobInfo.usrScrDir}"')
+    jobfile.append(f'exeDir="{jobInfo.exeDir}"')
+    jobfile.append(f'ctDirRemote="{jobInfo.ctDir_remote}"')
+    jobfile.append(f'ctDirLocal="{jobInfo.ctDir_local}"')
+    jobfile.append(f'ct="{jobInfo.container}"')
+    jobfile.append(f'ctPath="$ctDir_remote"/"$ct"')
+    jobfile.append('')
 
-    jobfile.append('# update the local containers as needed')
+    jobfile.append('# update containers')
     jobfile.append(f'echo "Requesting lock for synchronization using rclone."')
-    jobfile.append(f'attempt_acquire_lock "$USER"_sync.lock {jobInfo.ctDir_local} 3600')
-    jobfile.append(f'create_directory_with_group_ownership {jobInfo.ctDir_local} {jobInfo.GID}')
-    jobfile.append(f'fetch_containers_from_drive {jobInfo.ctDir_remote} {jobInfo.ctDir_local}')
-    jobfile.append(f'release_lock "$USER"_sync.lock {jobInfo.ctDir_local}')
+    jobfile.append(f'attempt_acquire_lock "$USER"_sync.lock "$scrDir" 3600')
+    jobfile.append(f'create_directory_with_group_ownership "$ctDirLocal" {jobInfo.GID}')
+    jobfile.append(f'fetch_containers_from_drive "$ctDirRemote" "$ctDirLocal"')
+    jobfile.append(f'release_lock "$USER"_sync.lock "$scrDir"')
     jobfile.append('')
 
     jobfile.append('# load the singularity module')
@@ -91,73 +76,34 @@ def get_jobfile(jobInfo:object):
     jobfile.append('')
 
     jobfile.append('# job execution')
-    jobfile.append(f'mkdir -p "$exeDir"')
+    jobfile.append('mkdir -p "$exeDir"')
     jobfile.append(f'rsync -avh "$localDir" "$exeDir"')
     jobfile.append('')
-
-    # if jobInfo.software == 'gaussian':
-    #     job_routine = build_gaussian16_routine(
-    #         scrdir='scr', 
-    #         n_cores=jobInfo.ram, 
-    #         job_input='input', 
-    #         container=f"{containers_local_dir}/{container}"
-    #         )
-    #     jobfile.write('\n'.join(job_routine)+'\n')
-
-    # elif jobInfo.software == 'orca':
-    #     job_routine = build_orca5_routine(
-    #         scrdir=job_scratch_dir_in_script, 
-    #         n_cores=args.cores, 
-    #         job_input=job_input_in_script,
-    #         job_output=job_name_in_script,
-    #         container=f"{containers_local_dir}/{container}"
-    #         )
-    #     jobfile.write('\n'.join(job_routine)+'\n')
-
-    if jobInfo.software == 'xtb':
+    jobfile.append(f'numjobs={jobInfo.numJobs}')
+    jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
+    jobfile.append(util.indent(f'job={jobInfo.bashJobname}',4))
+    jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
+    jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
+    jobfile.append(util.indent('mkdir "$jobDir"', 4))
+    jobfile.append('')
+    jobfile.append(util.indent('cd "$jobDir"', 4))
+    if jobInfo.software == 'gaussian':
+        pass
+    elif jobInfo.software == 'orca':
+        pass
+    elif jobInfo.software == 'xtb':
         job_routine = build_xtb_routine(jobInfo)
-        
-
-    # elif jobInfo.software == 'crest':
-    #     job_routine = build_crest_routine(
-    #         scrdir=job_scratch_dir_in_script, 
-    #         n_cores=args.cores, 
-    #         job_input=job_input_in_script, 
-    #         flags=args.flags, 
-    #         container=f"{containers_local_dir}/{container}",
-    #         standalone=args.standalone
-    #         )
-    jobfile.extend(job_routine)
-
-
-
-
-
+    elif jobInfo.software == 'crest':
+        pass
+    jobfile.extend([util.indent(s,4) for s in job_routine])
+    jobfile.append(util.indent('cd "$exeDir"', 4))
+    jobfile.append('')
+    jobfile.append('done')    
     jobfile.append('')
     jobfile.append('exit')
+
     jobfile_content = "\n".join(jobfile)
     return jobfile_content
-
-
-
-
-    # jobfile.write(f'export {job_input_in_script}={job_input}\n')
-    # jobfile.write(f'export {job_name_in_script}={job_name}\n')
-    # jobfile.write('\n')
-    # if args.send_files:
-    #     jobfile.write(f'# send additional files to scratch dir\n')
-    #     for file in args.send_files:
-    #             jobfile.write(f'cp "${job_local_dir_in_script}"/{file} "${job_scratch_dir_in_script}"\n')      
-    # jobfile.write('\n')
-    # jobfile.write(f'cp "${job_input_in_script}" "${job_scratch_dir_in_script}"\n')
-    # jobfile.write(f'cd "${job_scratch_dir_in_script}"\n')
-    # jobfile.write('\n')
-    # jobfile.write(f'echo "Job Name: "${job_name_in_script}""\n')
-    # jobfile.write('\n')
-
-    # # Write software settings to the job file
-    # jobfile.write("{:#^80}".format('  SOFTWARE SETTINGS  ')+'\n') 
-
 
 
     
