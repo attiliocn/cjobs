@@ -1,6 +1,7 @@
 import hashlib
 import datetime
 import os
+import textwrap
 
 def get_timestamp():
     current_time = datetime.datetime.now()
@@ -28,3 +29,6 @@ def convert_hours_to_hhmmss(hours:float) -> str:
 def py_array_to_bash(arr:list):
     bash_arr = " ".join([f'"{i}"' for i in arr])
     return bash_arr
+
+def indent(text, amount, ch=' '):
+    return textwrap.indent(text, amount * ch)
