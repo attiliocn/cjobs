@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import configparser
-import datetime
 import os
-import pathlib
 import sys
 
 from tools.arguments import create_argument_parser
@@ -13,8 +11,11 @@ from tools.container_tools import (is_cached_containers_file_old,
                                    request_containers_using_rclone,
                                    show_cached_containers_file_contents)
 from tools.scheduler_tools import get_scheduler_variables
-from tools.util import get_hash_from_timestamp
+from tools.util import get_hash_from_timestamp, convert_hours_to_hhmmss
 from tools.write_job import write_job
+
+from tools.jobdetails import JobDetails
+
 
 # settings paths and files
 CJOBS_DIR = sys.path[0]
@@ -93,89 +94,24 @@ if args.container not in containers_data.keys():
     )
     exit()
 
-# convert jobtime from hours to input format HH:MM:SS
-duration = datetime.timedelta(hours=args.time)
-totsec = duration.total_seconds()
-h = totsec//3600
-m = (totsec%3600) // 60
-sec =(totsec%3600)%60 #just for reference
-args.time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
-
 # get scheduler variables
 scheduler_variables = get_scheduler_variables(SCHEDULER)
 
+# parse job information to object
+jobs = JobDetails(args.jobs)
+jobs.isArray = args.array
+jobs.time = convert_hours_to_hhmmss(args.time)
+
+jobs.cjobsID = get_hash_from_timestamp()[:4]
+
+jobs.localDir = f"{os.getcwd()}"
+jobs.scrDir = f"{USER_SCRATCH_DIR}"
+jobs.exeDir = f"{jobs.scrDir}/jobs/{scheduler_variables['job_id']}"
+jobs.ctDir_remote = CONTAINERS_CLOUD_DIR
+jobs.ctDir_local = CONTAINERS_LOCAL_DIR
+
 # write jobs
-if args.array and len(args.job) > 1:
-    # create the queue config file
-    with open('queue.conf', mode='w') as f:
-        for i, job in enumerate(args.job):
-            f.write(f'{i+1},{job}\n')
-
-    job_scratch_dir = f"\"{USER_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"/\"{scheduler_variables['array_task_id']}\"\""
-    job_scratch_dir_in_script = 'job_scratch_dir'
-    
-    job_input = f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\" ' + r"'$1==ArrayTaskID {print $2}' " + f'"${job_scratch_dir_in_script}"/queue.conf)'
-    job_input_in_script = 'job_input'
-
-    job_tag = f"array_{get_hash_from_timestamp()[:6]}"
-    job_name = fr"$(echo ${job_input_in_script} | rev | cut -f 2- -d '.' | rev)"
-    job_name_in_script = 'job_name'
-
-    job_local_dir =f'{os.getcwd()}'
-    job_local_dir_in_script = 'job_local_dir'
-
-    write_job(
-            args,
-            scheduler=SCHEDULER, 
-            containers_cloud_dir=CONTAINERS_CLOUD_DIR, 
-            containers_local_dir=CONTAINERS_LOCAL_DIR,
-            container=containers_data[args.container]['file'],
-            shared_gid = SHARED_GID,
-            singularity_version=SINGULARITY_VERSION,
-            scratch_dir=SCRATCH_DIR,
-            job_input=job_input,
-            job_input_in_script=job_input_in_script,
-            job_tag=job_tag,
-            job_name=job_name,
-            job_name_in_script=job_name_in_script,
-            job_local_dir=job_local_dir,
-            job_local_dir_in_script=job_local_dir_in_script,
-            job_scratch_dir=job_scratch_dir,
-            job_scratch_dir_in_script=job_scratch_dir_in_script
-        )
-else:
-    for job in args.job:     
-        job_input = job
-        job_input_in_script = 'job_input'
-
-        job_tag = pathlib.Path(job_input).stem
-        job_name = job_tag
-        job_name_in_script = 'job_name'
-        
-        job_local_dir =f'{os.getcwd()}'
-        job_local_dir_in_script = 'job_local_dir'
-
-        job_scratch_dir = f"\"{USER_SCRATCH_DIR}/\"{scheduler_variables['job_id']}\"\""
-        job_scratch_dir_in_script = 'job_scratch_dir'
-
-        write_job(
-            args,
-            scheduler=SCHEDULER, 
-            containers_cloud_dir=CONTAINERS_CLOUD_DIR, 
-            containers_local_dir=CONTAINERS_LOCAL_DIR,
-            container=containers_data[args.container]['file'],
-            shared_gid = SHARED_GID,
-            singularity_version=SINGULARITY_VERSION,
-            scratch_dir=SCRATCH_DIR,
-            job_input=job_input,
-            job_input_in_script=job_input_in_script,
-            job_tag=job_tag,
-            job_name=job_name,
-            job_name_in_script=job_name_in_script,
-            job_local_dir=job_local_dir,
-            job_local_dir_in_script=job_local_dir_in_script,
-            job_scratch_dir=job_scratch_dir,
-            job_scratch_dir_in_script=job_scratch_dir_in_script
-        )
+jobs.write_joblist('cjobs-joblist.csv')
+write_job(job_settings=jobs, cli_args=args)
 
     

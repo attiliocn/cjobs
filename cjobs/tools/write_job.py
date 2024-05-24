@@ -5,40 +5,39 @@ import pathlib
 from tools.scheduler_tools import build_scheduler_header
 from tools.routines import build_gaussian16_routine, build_orca5_routine, build_xtb_routine, build_crest_routine
 
-def write_job(
-    args, 
-    scheduler, 
-    containers_cloud_dir, 
-    containers_local_dir,
-    container,
-    shared_gid,
-    singularity_version,
-    scratch_dir,
-    job_input,
-    job_input_in_script,
-    job_tag,
-    job_name,
-    job_name_in_script,
-    job_local_dir,
-    job_local_dir_in_script,
-    job_scratch_dir,
-    job_scratch_dir_in_script
-):
+def write_job(global_settings, job_settings, cli_args):
+    
     CJOBS_DIR = pathlib.Path(sys.argv[0]).parent
 
-    # Write scheduler header to the job file
-    jobfile = open(f'job_{job_tag}.sh', mode='w')
+    # open jobfile and write the bash shebang
+    jobfile = open(f'job_{job_settings.jobID}.sh', mode='w')
     jobfile.write('#!/bin/bash\n')
+
+    # write scheduler header to the job file
     scheduler_header = build_scheduler_header(
-        scheduler=scheduler, 
-        job_name=job_tag, 
-        n_cores=args.cores, 
-        memory=args.memory_per_core, 
-        job_time=args.time,
-        n_jobs=len(args.job),
-        job_array=args.array
+        scheduler=global_settings.scheduler, 
+        job_name=job_settings.job_id, 
+        n_cores=cli_args.cores, 
+        memory=cli_args.memory_per_core, 
+        job_time=cli_args.time,
+        n_jobs=len(cli_args.job),
+        job_array=cli_args.array
     )
     jobfile.write('\n'.join(scheduler_header)+'\n\n')
+
+    # Write local variables definitions to job file
+    jobfile.write("{:#^80}".format('  ENVIRONMENT  ')+'\n')
+    jobfile.write('# job variables\n')
+    jobfile.write(f'job_filename="{job_settings.job_filename}"\n')
+    jobfile.write(f'job_basename="{job_settings.job_basename}"\n')
+    jobfile.write('# local environment\n')
+    jobfile.write(f'local_dir="{job_settings.local_dir}"\n')
+    jobfile.write('# execution environment\n')
+    jobfile.write(f'usr_scratch_dir="{job_settings.usr_scratch_dir}"\n')
+    jobfile.write(f'execution_dir="{job_settings.execution_dir}"\n')
+    jobfile.write('# containers\n')
+    jobfile.write(f'ct_remote_dir="{job_settings.ct_remote_dir}"\n')
+    jobfile.write(f'ct_local_dir="{job_settings.ct_local_dir}"\n')
 
     # Write clean_job trap function to job file
     jobfile.write("{:#^80}".format('  CLEAN JOB  ')+'\n') 
@@ -63,7 +62,12 @@ def write_job(
     
     jobfile.write(f'module load singularity/{singularity_version}\n\n')
 
-    # Write job directories to the job file
+    
+
+
+
+
+    ######
     jobfile.write("{:#^80}".format('  JOB INFORMATION  ')+'\n')
     jobfile.write(f'export {job_local_dir_in_script}="{job_local_dir}"\n')
     jobfile.write(f'cd "${job_local_dir_in_script}"\n')
