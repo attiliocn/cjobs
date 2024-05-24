@@ -2,7 +2,7 @@ function clean_job() {
     echo "NOTICE: Received signal. The trap has been activated."
     if [[ -d "$exeDir" ]]; then
         echo "Copying outputs to local directory."
-        rsync -avh "$exeDir"/ "$localDir"
+        rsync -avh "$exeDir"/ "$localDir" --exclude '*.stdout' --exclude '*.stderr'
         echo "Successfully copied outputs."
         echo "Removing scratch directory."
         rm -vrf "$exeDir"
