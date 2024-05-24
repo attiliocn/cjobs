@@ -50,7 +50,7 @@ def build_xtb_routine(job:object):
             '',
             'singularity run \\',
             '--bind="$PWD":"$PWD" \\',
-            '"$ct_path" \\',
+            '"$ctPath" \\',
             '"$PWD" \\',
             f'xtb "$job" {job.options} &> xtb.output &',
             'wait',
