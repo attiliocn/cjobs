@@ -60,7 +60,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'ctDirRemote="{jobInfo.ctDir_remote}"')
     jobfile.append(f'ctDirLocal="{jobInfo.ctDir_local}"')
     jobfile.append(f'ct="{jobInfo.container}"')
-    jobfile.append(f'ctPath="$ctDirRemote"/"$ct"')
+    jobfile.append(f'ctPath="$ctDirLocal"/"$ct"')
     jobfile.append('')
 
     jobfile.append('# update containers')
@@ -77,7 +77,7 @@ def get_jobfile(jobInfo:object):
 
     jobfile.append('# job execution')
     jobfile.append('mkdir -p "$exeDir"')
-    jobfile.append(f'rsync -avh "$localDir" "$exeDir"')
+    jobfile.append(f'rsync -avh "$localDir"/ "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
