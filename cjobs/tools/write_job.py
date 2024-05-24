@@ -60,7 +60,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'ctDirRemote="{jobInfo.ctDir_remote}"')
     jobfile.append(f'ctDirLocal="{jobInfo.ctDir_local}"')
     jobfile.append(f'ct="{jobInfo.container}"')
-    jobfile.append(f'ctPath="$ctDir_remote"/"$ct"')
+    jobfile.append(f'ctPath="$ctDirRemote"/"$ct"')
     jobfile.append('')
 
     jobfile.append('# update containers')
