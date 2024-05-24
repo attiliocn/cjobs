@@ -25,5 +25,6 @@ def convert_hours_to_hhmmss(hours:float) -> str:
     converted_time = f"{int(h):02d}:{int(m):02d}:{int(sec):02d}"
     return converted_time
 
-def get_basename(filename):
-    pass
+def py_array_to_bash(arr:list):
+    bash_arr = " ".join([f'"{i}"' for i in arr])
+    return bash_arr
