@@ -1,17 +1,15 @@
 function clean_job() {
-    echo "NOTICE: Received signal. The trap has been activated."
+    echo "LOG: Received signal. The trap has been activated."
     if [[ -d "$exeDir" ]]; then
-        echo "Copying outputs to local directory."
+        echo "LOG: Copying outputs to local directory."
         rsync -avh "$exeDir"/ "$localDir" --exclude '*.stdout' --exclude '*.stderr'
-        echo "Successfully copied outputs."
-        echo "Removing scratch directory."
+        echo "LOG: Successfully copied outputs."
+        echo "LOG: Removing scratch directory."
         rm -vrf "$exeDir"
-        echo "Scratch directory removed."
-        echo "Job completed."
-        echo ""
+        echo "LOG: Scratch directory removed."
+        echo "LOG: Job completed."
     else
-        echo "Scratch directory does not exist."
-        echo ""
+        echo "LOG: Scratch directory does not exist."
     fi
     exit
 }
