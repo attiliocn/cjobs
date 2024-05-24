@@ -40,29 +40,23 @@ def build_orca5_routine(scrdir, n_cores, job_input, job_output, container):
 
 def build_xtb_routine(job:object):
     xtb_routine = []
-    xtb_routine.append(f'export MKL_NUM_THREADS={job.cpu}')
-    xtb_routine.append(f'export OMP_NUM_THREADS={job.cpu}')
-    xtb_routine.append('export OMP_STACKSIZE=4G')
-    xtb_routine.append('ulimit -s unlimited')
-    xtb_routine.append('')
-    xtb_routine.append('for job in ${jobs[@]}; do')
-    xtb_routine.append('    create some dir')
-    xtb_routine.append('    enter some dir')
-    xtb_routine.append('')
     xtb_routine.extend(
         [
-            '    singularity run \\',
-            '        --bind="$PWD":"$PWD" \\',
-            '        "$ct" \\',
-            '        "$PWD" \\',
-            f'        xtb "$job" {job.options} &> xtb.output &'
-
+            '# <-- xtb execution routine',
+            f'export MKL_NUM_THREADS={job.cpu}',
+            f'export OMP_NUM_THREADS={job.cpu}',
+            'export OMP_STACKSIZE=4G',
+            'ulimit -s unlimited',
+            '',
+            'singularity run \\',
+            '--bind="$PWD":"$PWD" \\',
+            '"$ct_path" \\',
+            '"$PWD" \\',
+            f'xtb "$job" {job.options} &> xtb.output &',
+            'wait',
+            '# end of xtb execution routine -->'
         ]
     )
-    xtb_routine.append('    wait')
-    xtb_routine.append('')
-    xtb_routine.append('    exit somedir')
-    xtb_routine.append('done')
     return xtb_routine
 
 def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone):
