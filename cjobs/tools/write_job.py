@@ -60,7 +60,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'ctDirRemote="{jobInfo.ctDir_remote}"')
     jobfile.append(f'ctDirLocal="{jobInfo.ctDir_local}"')
     jobfile.append(f'ct="{jobInfo.container}"')
-    jobfile.append(f'ctPath="$ctDirLocal"/"$ct"')
+    jobfile.append(f'ctPath="{jobInfo.ctDir_local}"/"{jobInfo.container}"')
     jobfile.append('')
 
     jobfile.append('# update containers')
@@ -85,6 +85,11 @@ def get_jobfile(jobInfo:object):
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
     jobfile.append(util.indent('mkdir "$jobDir"', 4))
+    jobfile.append('')
+    jobfile.append(util.indent('echo LOG: Current job: "$job"',4))
+    jobfile.append(util.indent('echo LOG: Job basename: "$basename"',4))
+    jobfile.append(util.indent('echo LOG: Running at: "$jobDir"',4))
+    jobfile.append(util.indent('echo LOG: Singularity container path: "$ct_path"',4))
     jobfile.append('')
     jobfile.append(util.indent('cd "$jobDir"', 4))
     if jobInfo.software == 'gaussian':
