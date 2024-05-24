@@ -118,9 +118,9 @@ jobs.cjobsID = 'abc1'
 
 if jobs.isArray:
     jobs.numJobs = 1
-    jobs.bashJobname = f"$(get_csv_element cjobs-joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
+    jobs.bashJobname = f"$(get_csv_element cjobs_joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
 else:
-    jobs.bashJobname = '$(get_csv_element cjobs-joblist.csv "$job_number" 2)'    
+    jobs.bashJobname = '$(get_csv_element cjobs_joblist.csv "$job_number" 2)'    
 
 jobs.localDir = f"{os.getcwd()}"
 jobs.scrDir = f"{SCRATCH_DIR}"
