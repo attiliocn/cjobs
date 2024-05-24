@@ -1,5 +1,5 @@
 function clean_job() {
-    echo "Received signal."
+    echo "NOTICE: Received signal. The trap has been activated."
     if [[ -d "$job_scratch_dir" ]]; then
         echo "Copying outputs to local directory."
         cp -vr "$job_scratch_dir" "$job_local_dir"/"$job_name"
