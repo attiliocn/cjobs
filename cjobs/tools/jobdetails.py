@@ -1,12 +1,11 @@
-import datetime
-from tools.util import get_basename
-
+import pathlib
 
 class JobDetails():
     def __init__(self, filenames):
         self.filenames = filenames
-        self.basenames = [get_basename(s) for s in self.filenames]
+        self.basenames = [pathlib.Path(s).stem for s in self.filenames]
         self.numJobs = len(self.filenames)
+        self.sendAdditionalFiles = False
 
     def write_joblist(self, filename):
         with open(filename, mode='w') as f:
