@@ -9,4 +9,6 @@ class JobDetails():
         self.numJobs = len(self.filenames)
 
     def write_joblist(self, filename):
-        pass
+        with open(filename, mode='w') as f:
+            for i, file in enumerate(self.filenames,1):
+                f.write(f"{i},{file}\n")
