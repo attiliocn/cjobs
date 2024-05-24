@@ -38,32 +38,31 @@ def build_orca5_routine(scrdir, n_cores, job_input, job_output, container):
     orca5_routine.append('exit')
     return orca5_routine
 
-def build_xtb_routine(scrdir, n_cores, job_input, flags, container, standalone=False):
+def build_xtb_routine(job:object):
     xtb_routine = []
-    xtb_routine.append(f'export MKL_NUM_THREADS={n_cores}')
-    xtb_routine.append(f'export OMP_NUM_THREADS={n_cores}')
-    xtb_routine.append(f'export OMP_STACKSIZE=4G')
-    xtb_routine.append(f'ulimit -s unlimited')
-    xtb_routine.append(f'')
-    if standalone:
-        flags = flags.split(' ')
-        xtb_routine.append(
-            f'''singularity run \\
-        --bind="${scrdir}":"${scrdir}" \\
-        {container} \\
-        "${scrdir}" \\
-        xtb {flags[0]} "${job_input}" {" ".join(flags[1:])} &> xtb.output &'''
+    xtb_routine.append(f'export MKL_NUM_THREADS={job.cpu}')
+    xtb_routine.append(f'export OMP_NUM_THREADS={job.cpu}')
+    xtb_routine.append('export OMP_STACKSIZE=4G')
+    xtb_routine.append('ulimit -s unlimited')
+    xtb_routine.append('')
+    xtb_routine.append('for job in ${jobs[@]}; do')
+    xtb_routine.append('    create some dir')
+    xtb_routine.append('    enter some dir')
+    xtb_routine.append('')
+    xtb_routine.extend(
+        [
+            '    singularity run \\',
+            '        --bind="$PWD":"$PWD" \\',
+            '        "$ct" \\',
+            '        "$PWD" \\',
+            f'        xtb "$job" {job.options} &> xtb.output &'
+
+        ]
     )
-    else:
-        xtb_routine.append(
-            f'''singularity run \\
-        --bind="${scrdir}":"${scrdir}" \\
-        {container} \\
-        "${scrdir}" \\
-        xtb "${job_input}" {flags} &> xtb.output &'''
-    )
-    xtb_routine.append('wait')
-    xtb_routine.append('exit')
+    xtb_routine.append('    wait')
+    xtb_routine.append('')
+    xtb_routine.append('    exit somedir')
+    xtb_routine.append('done')
     return xtb_routine
 
 def build_crest_routine(scrdir, n_cores, job_input, flags, container, standalone):
