@@ -100,20 +100,51 @@ scheduler_variables = get_scheduler_variables(SCHEDULER)
 # parse job information to object
 jobs = JobDetails(args.jobs)
 jobs.scheduler = SCHEDULER
+jobs.software = args.subparser
+jobs.container = containers_data[args.container]['file']
 jobs.isArray = args.array
 jobs.isMassive = args.massive
 jobs.cpu = args.cores
 jobs.ram = args.memory_per_core
 jobs.time = convert_hours_to_hhmmss(args.time)
+jobs.singularity_version = SINGULARITY_VERSION
+jobs.GID = SHARED_GID
+
+if hasattr(args, "flags"):
+    jobs.options = args.flags
 
 #jobs.cjobsID = get_hash_from_timestamp()[:4]
 jobs.cjobsID = 'abc1'
+
+if jobs.isArray:
+    jobs.schedulerID = (
+        f'$(awk -F "," -v ArrayTaskID=\"{scheduler_variables["array_task_id"]}\" ' 
+        + 
+        r"'$1==ArrayTaskID {print $2}' "
+        +
+        f'"$scrDir"/cjobs_joblist.csv)'
+    )
+    jobs.basenames = fr"$(echo $jobs | rev | cut -f 2- -d '.' | rev)"
+else:
+    jobs.schedulerID = (
+        f'$(awk -F "," -v ArrayTaskID=\"$CURRENT_JOB\" ' 
+        + 
+        r"'$1==ArrayTaskID {print $2}' "
+        +
+        f'"$scrDir"/cjobs_joblist.csv)'
+    )
+    jobs.basenames = fr"$(echo $jobs | rev | cut -f 2- -d '.' | rev)"
+
 
 jobs.localDir = f"{os.getcwd()}"
 jobs.scrDir = f"{USER_SCRATCH_DIR}"
 jobs.exeDir = f"{jobs.scrDir}/jobs/{scheduler_variables['job_id']}"
 jobs.ctDir_remote = CONTAINERS_CLOUD_DIR
 jobs.ctDir_local = CONTAINERS_LOCAL_DIR
+
+if args.send_files:
+    jobs.sendAdditionalFiles = True
+    jobs.additionalFiles = args.send_files
 
 # write joblist
 jobs.write_joblist('cjobs_joblist.csv')
