@@ -61,7 +61,7 @@ def create_argument_parser():
     # gaussian16
     parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
     parser_gaussian.add_argument(
-        '-j','--job', 
+        '-j','--jobs', 
         nargs='+', 
         required=True, 
         help='gaussian input file'
@@ -76,7 +76,7 @@ def create_argument_parser():
     # orca
     parser_orca = subparsers.add_parser('orca', help='setup an Orca calculation', parents=[parser_cluster])
     parser_orca.add_argument(
-        '-j','--job', 
+        '-j','--jobs', 
         nargs='+', 
         required=True, 
         help='orca input file'
@@ -91,7 +91,7 @@ def create_argument_parser():
     # xtb
     parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
     parser_xtb.add_argument(
-        '-j','--job', 
+        '-j','--jobs', 
         nargs='+', 
         required=True, 
         help='xTB-compatible coordinates file'
@@ -122,7 +122,7 @@ def create_argument_parser():
     # crest
     parser_crest = subparsers.add_parser('crest', help="setup a crest calculation", parents=[parser_cluster])
     parser_crest.add_argument(
-        '-j','--job', 
+        '-j','--jobs', 
         nargs='+', 
         required=True, 
         help='coordinates file'
