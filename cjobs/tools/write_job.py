@@ -94,13 +94,13 @@ def get_jobfile(jobInfo:object):
     jobfile.append('')
     jobfile.append(util.indent('cd "$jobDir"', 4))
     if jobInfo.software == 'gaussian':
-        pass
+        job_routine = build_gaussian16_routine(jobInfo)
     elif jobInfo.software == 'orca':
-        pass
+        job_routine = build_orca5_routine(jobInfo)
     elif jobInfo.software == 'xtb':
         job_routine = build_xtb_routine(jobInfo)
     elif jobInfo.software == 'crest':
-        pass
+        job_routine = build_crest_routine(jobInfo)
     jobfile.extend([util.indent(s,4) for s in job_routine])
     jobfile.append(util.indent('cd "$exeDir"', 4))
     jobfile.append('done')    
