@@ -74,6 +74,7 @@ def build_crest_routine(job:object):
             f'export OMP_NUM_THREADS={job.cpu}',
             'export OMP_STACKSIZE=4G',
             'ulimit -s unlimited',
+            '',
             'singularity run \\',
             '--bind="$PWD":"$PWD" \\',
             '"$ctPath" \\',
