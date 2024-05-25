@@ -23,6 +23,16 @@ def create_argument_parser():
     # this parser interprets arguments related to resources allocation at runtime
     parser_cluster = subparsers.add_parser('job-setup', add_help=False)
     parser_cluster.add_argument(
+        "--jobfile",
+        default='auto',  
+        help=(
+            'Name of the jobfile to be generated. '
+            'AUTO: produce a random filename '
+            'FILENAME: use the same name of the job '
+            '[STRING]: use STRING as filename'
+        )
+    )
+    parser_cluster.add_argument(
         "--container", 
         required=True, 
         help='CONTAINER id. Use \'cjobs listcontainers\' to list available containers'
@@ -119,7 +129,6 @@ def create_argument_parser():
         )
     )
     
-
     # crest
     parser_crest = subparsers.add_parser('crest', help="setup a crest calculation", parents=[parser_cluster])
     parser_crest.add_argument(

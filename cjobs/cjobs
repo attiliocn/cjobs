@@ -124,8 +124,12 @@ if hasattr(args, "flags"):
 if hasattr(args, "standalone"):
     jobs.standalone = args.standalone
 
-#jobs.cjobsID = get_hash_from_timestamp()[:4]
-jobs.cjobsID = 'abc1'
+if args.jobfile == 'auto':
+    jobs.cjobsID = get_hash_from_timestamp()[:4]
+elif args.jobfile == 'filename':
+    jobs.cjobsID = False #TODO: finish single job implementation (generate n jobfiles)
+else:
+    jobs.cjobsID = args.jobfile
 
 if jobs.isArray:
     jobs.bashJobname = f"$(get_csv_element cjobs_joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
