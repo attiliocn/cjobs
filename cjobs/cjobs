@@ -113,6 +113,9 @@ jobs.GID = SHARED_GID
 if hasattr(args, "flags"):
     jobs.options = args.flags
 
+if hasattr(args, "standalone"):
+    jobs.standalone = args.standalone
+
 #jobs.cjobsID = get_hash_from_timestamp()[:4]
 jobs.cjobsID = 'abc1'
 
