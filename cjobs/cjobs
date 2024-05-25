@@ -134,7 +134,18 @@ jobs.ctDir_local = CONTAINERS_LOCAL_DIR
 
 if args.send_files:
     jobs.sendAdditionalFiles = True
-    jobs.additionalFiles = args.send_files
+    for f in args.send_files:
+        jobs.include_additional_file(f)
+
+if hasattr(args, "use_reference"):
+    if args.use_reference:
+        jobs.sendAdditionalFiles = True
+        jobs.include_additional_file('"$basename".ref', rename='coord.ref')
+
+if hasattr(args, "use_input"):
+    if args.use_input:
+        jobs.sendAdditionalFiles = True
+        jobs.include_additional_file('"$basename".inp', rename=f'{jobs.software}.inp')
 
 # write joblist
 jobs.write_joblist('cjobs_joblist.csv')

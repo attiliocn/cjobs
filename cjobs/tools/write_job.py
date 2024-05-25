@@ -86,6 +86,12 @@ def get_jobfile(jobInfo:object):
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
     jobfile.append(util.indent('mkdir "$jobDir"', 4))
     jobfile.append(util.indent('cp "$job" "$jobDir"', 4))
+    if jobInfo.sendAdditionalFiles:
+        for name,rename in jobInfo.additionalFiles:
+            if rename:
+                jobfile.append(util.indent(f'cp {name} "$jobDir"/{rename} # additional file',4))
+            else:
+                jobfile.append(util.indent(f'cp {name} "$jobDir" # additional file',4))
     jobfile.append('')
     jobfile.append(util.indent('echo LOG: Current job: "$job"',4))
     jobfile.append(util.indent('echo LOG: Job basename: "$basename"',4))
