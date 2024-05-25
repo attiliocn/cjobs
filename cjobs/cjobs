@@ -128,7 +128,6 @@ if hasattr(args, "standalone"):
 jobs.cjobsID = 'abc1'
 
 if jobs.isArray:
-    jobs.numJobs = 1
     jobs.bashJobname = f"$(get_csv_element cjobs_joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
 else:
     jobs.bashJobname = '$(get_csv_element cjobs_joblist.csv "$job_number" 2)'    

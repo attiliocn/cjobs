@@ -12,15 +12,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append('#!/bin/bash')
 
     # write scheduler header to the job file
-    scheduler_header = build_scheduler_header(
-        scheduler=jobInfo.scheduler, 
-        job_name=jobInfo.cjobsID, 
-        n_cores=jobInfo.cpu, 
-        memory=jobInfo.ram, 
-        job_time=jobInfo.time,
-        n_jobs=jobInfo.numJobs,
-        job_array=jobInfo.isArray
-    )
+    scheduler_header = build_scheduler_header(jobInfo)
     jobfile.append('')
 
     jobfile.append("{:#^40}".format('  SCHEDULER  '))
@@ -80,7 +72,12 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'rsync -avh "$localDir"/ "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
-    jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
+    if jobInfo.isArray:
+        jobfile.append('# NOTICE: This is an array job.')
+        jobfile.append('#         The for loop will run only once.')
+        jobfile.append(f'for job_number in $(seq 1 1); do')
+    else:
+        jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
     jobfile.append(util.indent(f'job={jobInfo.bashJobname}',4))
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
