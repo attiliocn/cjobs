@@ -72,12 +72,12 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'rsync -avh "$localDir"/ "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
-    if jobInfo.isArray:
-        jobfile.append('# NOTICE: This is an array job.')
-        jobfile.append('#         The for loop will run only once.')
-        jobfile.append(f'for job_number in $(seq 1 1); do')
-    else:
+    if jobInfo.mode == 'massive':
         jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
+    else:
+        jobfile.append('# NOTICE: This is not a massive job.')
+        jobfile.append('#         The for loop will run only once.')
+        jobfile.append(f'for job_number in $(seq 1 1); do')        
     jobfile.append(util.indent(f'job={jobInfo.bashJobname}',4))
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
