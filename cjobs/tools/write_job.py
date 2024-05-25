@@ -64,7 +64,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append('')
 
     jobfile.append('# update containers')
-    jobfile.append(f'echo "Requesting lock for synchronization using rclone."')
+    jobfile.append(f'echo "LOG: Requesting lock for synchronization using rclone."')
     jobfile.append(f'attempt_acquire_lock "$USER"_sync.lock "$scrDir" 3600')
     jobfile.append(f'create_directory_with_group_ownership "$ctDirLocal" {jobInfo.GID}')
     jobfile.append(f'fetch_containers_from_drive "$ctDirRemote" "$ctDirLocal"')
@@ -103,7 +103,6 @@ def get_jobfile(jobInfo:object):
         pass
     jobfile.extend([util.indent(s,4) for s in job_routine])
     jobfile.append(util.indent('cd "$exeDir"', 4))
-    jobfile.append('')
     jobfile.append('done')    
     jobfile.append('')
     jobfile.append('exit')
