@@ -46,16 +46,17 @@ def create_argument_parser():
         help='maximum allocation time in hours'
     )
     parser_cluster.add_argument(
-        "--array", 
-        action='store_true', 
-        help='request a job array. Incompatible with --massive'
+        "--mode", 
+        choices=['single', 'array', 'massive'],
+        default='single' ,
+        help=(
+            'jobfile generator engine.\n'
+            '  SINGLE: one jobfile per input. Default behaviour; '
+            '  ARRAY: one jobfile for all inputs. Allocate AN ARRAY of jobs; ' 
+            '  MASSIVE: one jobfile for all inputs. Allocate ONLY ONE job'
+        )
     )
-    parser_cluster.add_argument(
-        "--massive", 
-        action='store_true', 
-        help='request a massive job. Incompatible with --array'
-    )
-
+    
     # SOFTWARE-SPECIFIC PARSERS
     
     # gaussian16
@@ -114,7 +115,7 @@ def create_argument_parser():
         help=(
             'Use the xTB detailed input file. '
             'The detailed input file should have the same name as the file provided in \'--job\' '
-            'but with a .inp extension. The \'--send-files\' option is required'
+            'but with a .inp extension.'
         )
     )
     
@@ -150,7 +151,7 @@ def create_argument_parser():
         help=(
             'Use the crest detailed input file. '
             'The detailed input file should have the same name as the file provided in \'--job\' '
-            'but with a .inp extension. The \'--send-files\' option is required'
+            'but with a .inp extension.'
         )
     )
     parser_crest.add_argument(
@@ -159,7 +160,7 @@ def create_argument_parser():
         help=(
             'Request the use a reference geometry. '
             'The reference geometry file should have the same name as the file provided in \'--job\' '
-            'but with a .coord extension. The \'--send-files\' option is required'
+            'but with a .coord extension.'
         )
     )
     return parser

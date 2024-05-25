@@ -102,8 +102,16 @@ jobs = JobDetails(args.jobs)
 jobs.scheduler = SCHEDULER
 jobs.software = args.subparser
 jobs.container = containers_data[args.container]['file']
-jobs.isArray = args.array
-jobs.isMassive = args.massive
+jobs.mode = args.mode
+if jobs.mode == 'single':
+    jobs.isArray = False
+    jobs.isMassive = False
+elif jobs.mode == 'array':
+    jobs.isArray = True
+    jobs.isMassive = False
+elif jobs.mode == 'massive':
+    jobs.isArray = False
+    jobs.isMassive = True
 jobs.cpu = args.cores
 jobs.ram = args.memory_per_core
 jobs.time = convert_hours_to_hhmmss(args.time)
