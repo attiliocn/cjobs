@@ -19,7 +19,7 @@ function fetch_containers_from_drive() {
         echo "LOG: The rclone command is unavailable. No synchronization will be performed."
         return
     fi
-
+    echo "LOG: Updating containers directory using rclone"
     rclone sync -v "$container_cloud_dir" "$container_local_dir"
 
     touch "$synced_file"

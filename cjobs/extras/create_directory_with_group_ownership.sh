@@ -15,7 +15,6 @@ function create_directory_with_group_ownership() {
         echo "LOG: Directory created: $directory"
         echo "LOG: Group ownership set to GID: $gid"
         echo "LOG: Permissions set to rwx for owner and group, and none for others."
-
     else
         echo "LOG: Directory already exists: $directory"
         directory_owner=$(stat -c "%U" "$parent_directory")

@@ -75,10 +75,13 @@ def get_jobfile(jobInfo:object):
     jobfile.append('')
 
     jobfile.append('# job execution')
+    jobfile.append(f'echo "LOG: Creating execution directory"')
     jobfile.append('mkdir -p "$exeDir"')
+    jobfile.append(f'echo "LOG: Synchronizing local directory with execution directory using rsync"')
     jobfile.append(f'rsync -avh "$localDir"/ "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
+    jobfile.append(f'echo "LOG: Running jobs"')
     if jobInfo.mode == 'massive':
         jobfile.append(f'for job_number in $(seq 1 "$numjobs"); do')
     else:
