@@ -16,7 +16,6 @@ from tools.write_job import get_jobfile
 
 from tools.jobdetails import JobDetails
 
-
 # settings paths and files
 CJOBS_DIR = sys.path[0]
 sys.path.append(CJOBS_DIR)
@@ -97,73 +96,67 @@ if args.container not in containers_data.keys():
 # get scheduler variables
 scheduler_variables = get_scheduler_variables(SCHEDULER)
 
-# parse job information to object
+# instantiate JobDetails using CLI arguments
 jobs = JobDetails(args.jobs)
+
 jobs.scheduler = SCHEDULER
 jobs.software = args.subparser
-jobs.container = containers_data[args.container]['file']
+jobs.containerFile = containers_data[args.container]['file']
+jobs.singularityVersion = SINGULARITY_VERSION
+jobs.GID = SHARED_GID
+
 jobs.mode = args.mode
-if jobs.mode == 'single':
-    jobs.isArray = False
-    jobs.isMassive = False
-elif jobs.mode == 'array':
+if jobs.mode == 'array':
     jobs.isArray = True
-    jobs.isMassive = False
+    jobs.bashJobname = f"$(get_csv_element cjobs_joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
 elif jobs.mode == 'massive':
-    jobs.isArray = False
     jobs.isMassive = True
+
 jobs.cpu = args.cores
 jobs.ram = args.memory_per_core
 jobs.time = convert_hours_to_hhmmss(args.time)
-jobs.singularity_version = SINGULARITY_VERSION
-jobs.GID = SHARED_GID
 
 if hasattr(args, "flags"):
     jobs.options = args.flags
-
 if hasattr(args, "standalone"):
     jobs.standalone = args.standalone
-
-if args.jobfile == 'auto':
-    jobs.cjobsID = get_hash_from_timestamp()[:4]
-elif args.jobfile == 'filename':
-    jobs.cjobsID = False #TODO: finish single job implementation (generate n jobfiles)
-else:
-    jobs.cjobsID = args.jobfile
-
-if jobs.isArray:
-    jobs.bashJobname = f"$(get_csv_element cjobs_joblist.csv \"{scheduler_variables['array_task_id']}\" 2)"
-else:
-    jobs.bashJobname = '$(get_csv_element cjobs_joblist.csv "$job_number" 2)'    
 
 jobs.localDir = f"{os.getcwd()}"
 jobs.scrDir = f"{SCRATCH_DIR}"
 jobs.usrScrDir = f"{USER_SCRATCH_DIR}"
 jobs.exeDir = f"{jobs.usrScrDir}/jobs/{scheduler_variables['job_id']}"
-jobs.ctDir_remote = CONTAINERS_CLOUD_DIR
-jobs.ctDir_local = CONTAINERS_LOCAL_DIR
+jobs.ctDirRemote = CONTAINERS_CLOUD_DIR
+jobs.ctDirLocal = CONTAINERS_LOCAL_DIR
 
 if args.send_files:
     jobs.sendAdditionalFiles = True
     for f in args.send_files:
         jobs.include_additional_file(f)
-
 if hasattr(args, "use_reference"):
     if args.use_reference:
         jobs.sendAdditionalFiles = True
         jobs.include_additional_file('"$basename".ref', rename='coord.ref')
-
 if hasattr(args, "use_input"):
     if args.use_input:
         jobs.sendAdditionalFiles = True
         jobs.include_additional_file('"$basename".inp', rename=f'{jobs.software}.inp')
 
-# write joblist
-jobs.write_joblist('cjobs_joblist.csv')
-
 # write jobfiles
-jobfile = get_jobfile(jobs)
-with open(f'cjobs_{jobs.cjobsID}.sh', mode='w') as f:
-    f.write(jobfile)
+jobs.write_joblist('cjobs_joblist.csv')  
+if args.mode == 'single':
+    for i, job in enumerate(args.jobs):
+        jobs.jobNumber = i + 1
+        jobs.cjobsID = jobs.jobBasenames[i]
 
+        jobfile = get_jobfile(jobs)
+        with open(f'cjobs_{jobs.cjobsID}.sh', mode='w') as f:
+            f.write(jobfile)
+else:
+    if args.jobfile == 'auto':
+        jobs.cjobsID = get_hash_from_timestamp()[:4]
+    else:
+        jobs.cjobsID = args.jobfile
     
+    jobfile = get_jobfile(jobs)
+    with open(f'cjobs_{jobs.cjobsID}.sh', mode='w') as f:
+        f.write(jobfile)
