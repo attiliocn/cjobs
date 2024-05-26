@@ -2,7 +2,7 @@ def build_scheduler_header(job:object):
     scheduler_header = []
     if job.scheduler == 'slurm':
         scheduler_header.append(f"#SBATCH --job-name {job.cjobsID}")
-        scheduler_header.append(f"#SBATCH --output=job_%x_%J.stdout")
+        scheduler_header.append(f"#SBATCH --output=cjobs_log_%x_%J.stdout")
         scheduler_header.append(f"#SBATCH --nodes=1")
         scheduler_header.append(f"#SBATCH --ntasks={job.cpu}")
         scheduler_header.append(f"#SBATCH --mem-per-cpu={job.ram}")
