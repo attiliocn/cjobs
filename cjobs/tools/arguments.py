@@ -28,7 +28,6 @@ def create_argument_parser():
         help=(
             'Name of the jobfile to be generated. '
             'AUTO: produce a random filename '
-            'FILENAME: use the same name of the job '
             '[STRING]: use STRING as filename'
         )
     )
