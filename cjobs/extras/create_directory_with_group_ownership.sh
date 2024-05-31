@@ -10,7 +10,7 @@ function create_directory_with_group_ownership() {
 
         # Change the group ownership by GID
         chown -R :"$gid" "$parent_directory"
-        chmod -R 770 "$parent_directory"
+        chmod -R 770 "$directory"
 
         echo "LOG: Directory created: $directory"
         echo "LOG: Group ownership set to GID: $gid"
