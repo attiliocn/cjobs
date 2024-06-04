@@ -24,7 +24,7 @@ function create_directory_with_group_ownership() {
 
             # Change the group ownership by GID
             chown -R :"$gid" "$parent_directory"
-            chmod -R 770 "$parent_directory"
+            chmod -R 770 "$directory"
         else
             echo "LOG: The user $USER is not the owner of the directory $parent_directory. There is nothing to do"
             return
