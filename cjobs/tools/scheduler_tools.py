@@ -5,7 +5,7 @@ def build_scheduler_header(job:object):
         scheduler_header.append(f"#SBATCH --output=cjobs_log_%x_%J.stdout")
         scheduler_header.append(f"#SBATCH --nodes=1")
         scheduler_header.append(f"#SBATCH --ntasks={job.cpu}")
-        scheduler_header.append(f"#SBATCH --mem-per-cpu={job.ram}")
+        scheduler_header.append(f"#SBATCH --mem={job.ram * job.cpu}")
         scheduler_header.append(f"#SBATCH --time={job.time}")
         if job.isArray == True:
             scheduler_header.append(f"#SBATCH --array=1-{job.numJobs}")
