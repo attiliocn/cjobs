@@ -70,10 +70,6 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'release_lock "$USER"_sync.lock "$scrDir"')
     jobfile.append('')
 
-    # jobfile.append('# load the singularity module')
-    # jobfile.append(f'module load singularity/"$singularityVersion"')
-    # jobfile.append('')
-
     jobfile.append('# job execution')
     jobfile.append(f'echo "LOG: Creating execution directory"')
     jobfile.append('mkdir -p "$exeDir"')
