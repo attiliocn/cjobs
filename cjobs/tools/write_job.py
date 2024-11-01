@@ -85,7 +85,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
     jobfile.append(util.indent('mkdir "$jobDir"', 4))
-    jobfile.append(util.indent('cp "$job" "$jobDir"', 4))
+    jobfile.append(util.indent('cp "$localDir"/"$job" "$jobDir"', 4))
     if jobInfo.sendAdditionalFiles:
         for name,rename in jobInfo.additionalFiles:
             if rename:
