@@ -48,7 +48,6 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'allocCPU={jobInfo.cpu}')
     jobfile.append(f'allocRAM={jobInfo.ram}')
     jobfile.append(f'g16GID={jobInfo.GID}')
-    jobfile.append(f'singularityVersion={jobInfo.singularityVersion}')
     jobfile.append(f'')
         
     jobfile.append('# relevant directories')
