@@ -72,8 +72,6 @@ def get_jobfile(jobInfo:object):
     jobfile.append('# job execution')
     jobfile.append(f'echo "LOG: Creating execution directory"')
     jobfile.append('mkdir -p "$exeDir"')
-    jobfile.append(f'echo "LOG: Copying the local directory to the run directory"')
-    jobfile.append('find "$localDir" -maxdepth 1 -type f -exec cp {} "$exeDir" \;')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'echo "LOG: Running jobs"')
