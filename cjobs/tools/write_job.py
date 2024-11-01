@@ -72,6 +72,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append('# job execution')
     jobfile.append(f'echo "LOG: Creating execution directory"')
     jobfile.append('mkdir -p "$exeDir"')
+    jobfile.append('cp cjobs_*.sh cjobs_joblist.csv "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'echo "LOG: Running jobs"')
