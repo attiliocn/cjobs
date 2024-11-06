@@ -48,7 +48,6 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'allocCPU={jobInfo.cpu}')
     jobfile.append(f'allocRAM={jobInfo.ram}')
     jobfile.append(f'g16GID={jobInfo.GID}')
-    jobfile.append(f'singularityVersion={jobInfo.singularityVersion}')
     jobfile.append(f'')
         
     jobfile.append('# relevant directories')
@@ -70,15 +69,10 @@ def get_jobfile(jobInfo:object):
     jobfile.append(f'release_lock "$USER"_sync.lock "$scrDir"')
     jobfile.append('')
 
-    jobfile.append('# load the singularity module')
-    jobfile.append(f'module load singularity/"$singularityVersion"')
-    jobfile.append('')
-
     jobfile.append('# job execution')
     jobfile.append(f'echo "LOG: Creating execution directory"')
     jobfile.append('mkdir -p "$exeDir"')
-    jobfile.append(f'echo "LOG: Synchronizing local directory with execution directory using rsync"')
-    jobfile.append(f'rsync -tvh "$localDir"/* "$exeDir"')
+    jobfile.append('cp cjobs_*.sh cjobs_joblist.csv "$exeDir"')
     jobfile.append('')
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'echo "LOG: Running jobs"')
@@ -92,7 +86,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
     jobfile.append(util.indent('mkdir "$jobDir"', 4))
-    jobfile.append(util.indent('cp "$job" "$jobDir"', 4))
+    jobfile.append(util.indent('cp "$localDir"/"$job" "$jobDir"', 4))
     if jobInfo.sendAdditionalFiles:
         for name,rename in jobInfo.additionalFiles:
             if rename:
