@@ -90,9 +90,9 @@ def get_jobfile(jobInfo:object):
     if jobInfo.sendAdditionalFiles:
         for name,rename in jobInfo.additionalFiles:
             if rename:
-                jobfile.append(util.indent(f'cp {name} "$jobDir"/{rename} # additional file',4))
+                jobfile.append(util.indent(f'cp "$localDir"/{name} "$jobDir"/{rename} # additional file',4))
             else:
-                jobfile.append(util.indent(f'cp {name} "$jobDir" # additional file',4))
+                jobfile.append(util.indent(f'cp "$localDir"/{name} "$jobDir" # additional file',4))
     jobfile.append('')
     jobfile.append(util.indent('echo LOG: Current job: "$job"',4))
     jobfile.append(util.indent('echo LOG: Job basename: "$basename"',4))
