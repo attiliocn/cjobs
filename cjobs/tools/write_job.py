@@ -97,6 +97,7 @@ def get_jobfile(jobInfo:object):
     jobfile.append(util.indent('echo LOG: Current job: "$job"',4))
     jobfile.append(util.indent('echo LOG: Job basename: "$basename"',4))
     jobfile.append(util.indent('echo LOG: Running at: "$jobDir"',4))
+    jobfile.append(util.indent('echo LOG: Hostname: $(hostname)',4))
     jobfile.append(util.indent('echo LOG: Singularity container path: "$ctPath"',4))
     jobfile.append('')
     jobfile.append(util.indent('cd "$jobDir"', 4))
