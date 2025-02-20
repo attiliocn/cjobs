@@ -89,6 +89,7 @@ def get_jobfile(jobInfo:object):
         jobfile.append('# NOTICE: This is not a massive job.')
         jobfile.append('#         The for loop will run only once.')
         jobfile.append(f'for job_number in {jobInfo.jobNumber}; do')        
+    jobfile.append(util.indent(f'cd $exeDir',4))
     jobfile.append(util.indent(f'job={jobInfo.bashJobname}',4))
     jobfile.append(util.indent(f'basename="{jobInfo.bashBasename}"',4))
     jobfile.append(util.indent(f'jobDir="$exeDir"/"$basename"', 4))
