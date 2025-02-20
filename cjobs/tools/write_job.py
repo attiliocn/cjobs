@@ -79,6 +79,7 @@ def get_jobfile(jobInfo:object):
     if jobInfo.scheduler == 'pbs-pro':
         jobfile.append('# load the singularity module')
         jobfile.append('module load singularity')
+        jobfile.append('')
 
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'echo "LOG: Running jobs"')
