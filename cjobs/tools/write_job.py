@@ -74,6 +74,12 @@ def get_jobfile(jobInfo:object):
     jobfile.append('mkdir -p "$exeDir"')
     jobfile.append('cp "$localDir"/cjobs_*.sh "$localDir"/cjobs_joblist.csv "$exeDir"')
     jobfile.append('')
+
+    # TODO: singularity loading should be explicitly configurated in the RC file
+    if jobInfo.scheduler == 'pbs-pro':
+        jobfile.append('# load the singularity module')
+        jobfile.append('module load singularity')
+
     jobfile.append(f'numjobs={jobInfo.numJobs}')
     jobfile.append(f'echo "LOG: Running jobs"')
     if jobInfo.mode == 'massive':
