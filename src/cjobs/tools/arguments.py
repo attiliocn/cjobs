@@ -1,174 +1,224 @@
 import argparse
 
 def create_argument_parser():
-    parser = argparse.ArgumentParser()
-
-    subparsers = parser.add_subparsers(required=True, dest='subparser')
-
-    # parser_settings #
-    # this parser handles the configuration of cjobs
-    parser_settings = subparsers.add_parser(
-        'config', 
-        help='create settings dir and settings file'
-    )
-
-    # parser_containers #
-    # this parser handles containers-related operations
-    parser_containers = subparsers.add_parser(
-        'listcontainers', 
-        help='list available containers'
-    )
-    
-    # parser_cluster #
-    # this parser interprets arguments related to resources allocation at runtime
-    parser_cluster = subparsers.add_parser('job-setup', add_help=False)
-    parser_cluster.add_argument(
-        "--jobfile",
-        default='auto',  
-        help=(
-            'Name of the jobfile to be generated. '
-            'AUTO: produce a random filename '
-            '[STRING]: use STRING as filename'
-        )
-    )
-    parser_cluster.add_argument(
+    resources_parser = argparse.ArgumentParser(add_help=False)
+    resources_parser.add_argument(
         "--container", 
         required=True, 
-        help='CONTAINER id. Use \'cjobs listcontainers\' to list available containers'
+        help='CONTAINER id. Use \'cjobs list\' to list available containers'
     )
-    parser_cluster.add_argument(
+    resources_parser.add_argument(
         "-c", "--cores", 
         type=int, 
         required=True, 
         help='number of CPU cores to allocate'
     )
-    parser_cluster.add_argument(
+    resources_parser.add_argument(
         "-m", "--memory-per-core",
         type=int,
         required=True,
         help='amount of memory in MB to allocate per CPU core'
     )
-    parser_cluster.add_argument(
+    resources_parser.add_argument(
         "-t", "--time", 
         type=float, 
         required=True, 
         help='maximum allocation time in hours'
     )
-    parser_cluster.add_argument(
-        "--mode", 
-        choices=['single', 'array', 'massive'],
-        default='single' ,
-        help=(
-            'jobfile generator engine.\n'
-            '  SINGLE: one jobfile per input. Default behaviour; '
-            '  ARRAY: one jobfile for all inputs. Allocate AN ARRAY of jobs; ' 
-            '  MASSIVE: one jobfile for all inputs. Allocate ONLY ONE job'
-        )
-    )
-    
-    # SOFTWARE-SPECIFIC PARSERS
-    
-    # gaussian16
-    parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
-    parser_gaussian.add_argument(
-        '-j','--jobs', 
-        nargs='+', 
-        required=True, 
-        help='gaussian input file'
-    )
-    parser_gaussian.add_argument(
-        "--send-files", 
+    resources_parser.add_argument(
+        "--manager-options", 
+        type=list,
         nargs='+', 
         required=False, 
-        help='send additional files files from local dir to calculation directory'
+        help='Workload Manager options'
     )
 
-    # orca
-    parser_orca = subparsers.add_parser('orca', help='setup an Orca calculation', parents=[parser_cluster])
-    parser_orca.add_argument(
+    parser = argparse.ArgumentParser(prog="cjobs")
+
+    main_functions_subparsers = parser.add_subparsers(dest='subparser', required=True)
+    main_functions_subparsers.add_parser("config", help="Configure the CLI")
+    main_functions_subparsers.add_parser("list", help="List all available containers")
+
+    job_parser = main_functions_subparsers.add_parser("create", help="Create a new job")
+    job_subparsers = job_parser.add_subparsers(dest="software", required=True)
+    orca_parser = job_subparsers.add_parser("orca", parents=[resources_parser], help="Create a ORCA job script")
+    orca_parser.add_argument(
         '-j','--jobs', 
         nargs='+', 
         required=True, 
         help='orca input file'
     )
-    parser_orca.add_argument(
+    orca_parser.add_argument(
         "--send-files", 
         nargs='+', 
         required=False, 
         help='send additional files files from local dir to calculation directory'
     )
 
-    # xtb
-    parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
-    parser_xtb.add_argument(
-        '-j','--jobs', 
-        nargs='+', 
-        required=True, 
-        help='xTB-compatible coordinates file'
-    )
-    parser_xtb.add_argument(
-        '-f','--flags', 
-        type=str, 
-        default='', 
-        help='xTB CLI options. See "https://xtb-docs.readthedocs.io/en/latest/commandline.html" for details'
-    )
-    parser_xtb.add_argument(
-        "--send-files", 
-        nargs='+', 
-        required=False, 
-        help='send additional files files from local dir to calculation directory'
-    )
-    parser_xtb.add_argument(
-        '--use-input', 
-        action='store_true', 
-        help=(
-            'Use the xTB detailed input file. '
-            'The detailed input file should have the same name as the file provided in \'--job\' '
-            'but with a .inp extension.'
-        )
-    )
+    # # parser_settings #
+    # # this parser handles the configuration of cjobs
+    # parser_settings = subparsers.add_parser(
+    #     'config', 
+    #     help='create settings dir and settings file'
+    # )
+
+    # # parser_containers #
+    # # this parser handles containers-related operations
+    # parser_containers = subparsers.add_parser(
+    #     'listcontainers', 
+    #     help='list available containers'
+    # )
     
-    # crest
-    parser_crest = subparsers.add_parser('crest', help="setup a crest calculation", parents=[parser_cluster])
-    parser_crest.add_argument(
-        '-j','--jobs', 
-        nargs='+', 
-        required=True, 
-        help='coordinates file'
-    )
-    parser_crest.add_argument(
-        '-f','--flags', 
-        type=str, 
-        default='', 
-        help='crest CLI options. See "https://crest-lab.github.io/crest-docs/page/documentation/keywords.html" for details'
-    )
-    parser_crest.add_argument(
-        '--standalone', 
-        action='store_true', 
-        help='Switch places of the first option with job input for standalone usage'
-    )
-    parser_crest.add_argument(
-        "--send-files", 
-        nargs='+', 
-        required=False, 
-        help='send additional files files from local dir to calculation directory'
-    )
-    parser_crest.add_argument(
-        '--use-input', 
-        action='store_true', 
-        help=(
-            'Use the crest detailed input file. '
-            'The detailed input file should have the same name as the file provided in \'--job\' '
-            'but with a .inp extension.'
-        )
-    )
-    parser_crest.add_argument(
-        '--use-reference', 
-        action='store_true', 
-        help=(
-            'Request the use a reference geometry. '
-            'The reference geometry file should have the same name as the file provided in \'--job\' '
-            'but with a .coord extension.'
-        )
-    )
+    # # parser_cluster #
+    # # this parser interprets arguments related to resources allocation at runtime
+    # parser_cluster = subparsers.add_parser('job-setup', add_help=False)
+    # parser_cluster.add_argument(
+    #     "--jobfile",
+    #     default='auto',  
+    #     help=(
+    #         'Name of the jobfile to be generated. '
+    #         'AUTO: produce a random filename '
+    #         '[STRING]: use STRING as filename'
+    #     )
+    # )
+    # parser_cluster.add_argument(
+    #     "--container", 
+    #     required=True, 
+    #     help='CONTAINER id. Use \'cjobs listcontainers\' to list available containers'
+    # )
+    # parser_cluster.add_argument(
+    #     "-c", "--cores", 
+    #     type=int, 
+    #     required=True, 
+    #     help='number of CPU cores to allocate'
+    # )
+    # parser_cluster.add_argument(
+    #     "-m", "--memory-per-core",
+    #     type=int,
+    #     required=True,
+    #     help='amount of memory in MB to allocate per CPU core'
+    # )
+    # parser_cluster.add_argument(
+    #     "-t", "--time", 
+    #     type=float, 
+    #     required=True, 
+    #     help='maximum allocation time in hours'
+    # )
+    # parser_cluster.add_argument(
+    #     "--mode", 
+    #     choices=['single', 'array', 'massive'],
+    #     default='single' ,
+    #     help=(
+    #         'jobfile generator engine.\n'
+    #         '  SINGLE: one jobfile per input. Default behaviour; '
+    #         '  ARRAY: one jobfile for all inputs. Allocate AN ARRAY of jobs; ' 
+    #         '  MASSIVE: one jobfile for all inputs. Allocate ONLY ONE job'
+    #     )
+    # )
+    
+    # # SOFTWARE-SPECIFIC PARSERS
+    
+    # # gaussian16
+    # parser_gaussian = subparsers.add_parser('gaussian', help='setup a Gaussian calculation', parents=[parser_cluster])
+    # parser_gaussian.add_argument(
+    #     '-j','--jobs', 
+    #     nargs='+', 
+    #     required=True, 
+    #     help='gaussian input file'
+    # )
+    # parser_gaussian.add_argument(
+    #     "--send-files", 
+    #     nargs='+', 
+    #     required=False, 
+    #     help='send additional files files from local dir to calculation directory'
+    # )
+
+    # # orca
+    # parser_orca = subparsers.add_parser('orca', help='setup an Orca calculation', parents=[parser_cluster])
+    # parser_orca.add_argument(
+    #     '-j','--jobs', 
+    #     nargs='+', 
+    #     required=True, 
+    #     help='orca input file'
+    # )
+    # parser_orca.add_argument(
+    #     "--send-files", 
+    #     nargs='+', 
+    #     required=False, 
+    #     help='send additional files files from local dir to calculation directory'
+    # )
+
+    # # xtb
+    # parser_xtb = subparsers.add_parser('xtb', help="setup a xTB calculation", parents=[parser_cluster])
+    # parser_xtb.add_argument(
+    #     '-j','--jobs', 
+    #     nargs='+', 
+    #     required=True, 
+    #     help='xTB-compatible coordinates file'
+    # )
+    # parser_xtb.add_argument(
+    #     '-f','--flags', 
+    #     type=str, 
+    #     default='', 
+    #     help='xTB CLI options. See "https://xtb-docs.readthedocs.io/en/latest/commandline.html" for details'
+    # )
+    # parser_xtb.add_argument(
+    #     "--send-files", 
+    #     nargs='+', 
+    #     required=False, 
+    #     help='send additional files files from local dir to calculation directory'
+    # )
+    # parser_xtb.add_argument(
+    #     '--use-input', 
+    #     action='store_true', 
+    #     help=(
+    #         'Use the xTB detailed input file. '
+    #         'The detailed input file should have the same name as the file provided in \'--job\' '
+    #         'but with a .inp extension.'
+    #     )
+    # )
+    
+    # # crest
+    # parser_crest = subparsers.add_parser('crest', help="setup a crest calculation", parents=[parser_cluster])
+    # parser_crest.add_argument(
+    #     '-j','--jobs', 
+    #     nargs='+', 
+    #     required=True, 
+    #     help='coordinates file'
+    # )
+    # parser_crest.add_argument(
+    #     '-f','--flags', 
+    #     type=str, 
+    #     default='', 
+    #     help='crest CLI options. See "https://crest-lab.github.io/crest-docs/page/documentation/keywords.html" for details'
+    # )
+    # parser_crest.add_argument(
+    #     '--standalone', 
+    #     action='store_true', 
+    #     help='Switch places of the first option with job input for standalone usage'
+    # )
+    # parser_crest.add_argument(
+    #     "--send-files", 
+    #     nargs='+', 
+    #     required=False, 
+    #     help='send additional files files from local dir to calculation directory'
+    # )
+    # parser_crest.add_argument(
+    #     '--use-input', 
+    #     action='store_true', 
+    #     help=(
+    #         'Use the crest detailed input file. '
+    #         'The detailed input file should have the same name as the file provided in \'--job\' '
+    #         'but with a .inp extension.'
+    #     )
+    # )
+    # parser_crest.add_argument(
+    #     '--use-reference', 
+    #     action='store_true', 
+    #     help=(
+    #         'Request the use a reference geometry. '
+    #         'The reference geometry file should have the same name as the file provided in \'--job\' '
+    #         'but with a .coord extension.'
+    #     )
+    # )
     return parser
